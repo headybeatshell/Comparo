@@ -6,140 +6,144 @@
 <title>Comparo</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@700;800&family=Inter:wght@400;500;600;700&family=Space+Mono:wght@400;700&family=Doto:wght@700&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@300;400;500&family=Inter:wght@300;400;500&family=IBM+Plex+Mono:wght@400&display=swap">
 <style>
-  /* Layout: one ruled column, editorial grotesk + mono labels; carmine marks what is live (active track, playing state, selected option). */
+  /* Layout: one centered dark column. Light rounded cards hold the two tracks; a coral disc is the one loud control; mint marks status and the selected option. Deliberately single-theme (dark). */
   :root {
-    --bg: #f0ede8; --surface: #e4ded5; --ink: #2b2b2b; --muted: #6f6a63;
-    --rule: #2b2b2b; --hair: #cdc6bc; --accent: #960018; --on-accent: #fbf3ee;
-    --accent-ink: #960018; --warn: #8a5a00; --dot: transparent;
+    --bg: #000000; --ink: #efebe6; --muted: #8e8a85; --line: #2c2c2c;
+    --card: #efebe6; --card-ink: #121212; --card-muted: #77736d;
+    --chip: #141414; --mint: #a9ecd5; --mint-ink: #0c2a21;
+    --coral: #e0604f; --coral-hi: #f08c78; --warn: #ffcf5c;
     --display: "Inter Tight", "Helvetica Neue", Arial, sans-serif;
     --text: "Inter", "Helvetica Neue", Arial, sans-serif;
-    --mono: "Space Mono", ui-monospace, "SF Mono", Menlo, monospace;
-    --digits: "Doto", "Space Mono", ui-monospace, monospace;
+    --mono: "IBM Plex Mono", ui-monospace, "SF Mono", Menlo, monospace;
+    color-scheme: dark;
   }
-  @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
-    --bg: #0b0b0b; --surface: #1c1c1c; --ink: #f1efec; --muted: #8f8b86;
-    --rule: #4a4847; --hair: #2a2928; --accent: #960018; --on-accent: #ffffff;
-    --accent-ink: #ef5d72; --warn: #ffcf5c; --dot: #262626; color-scheme: dark; } }
-  :root[data-theme="dark"] {
-    --bg: #0b0b0b; --surface: #1c1c1c; --ink: #f1efec; --muted: #8f8b86;
-    --rule: #4a4847; --hair: #2a2928; --accent: #960018; --on-accent: #ffffff;
-    --accent-ink: #ef5d72; --warn: #ffcf5c; --dot: #262626; color-scheme: dark; }
-
   * { box-sizing: border-box; }
   html, body { margin: 0; min-height: 100%; }
   body {
-    background: var(--bg);
-    background-image: radial-gradient(var(--dot) 1.2px, transparent 1.6px);
-    background-size: 18px 18px;
-    color: var(--ink);
-    font: 16px/1.45 var(--text);
-    padding-block: 28px 40px;
+    background: var(--bg); color: var(--ink);
+    font: 300 17px/1.5 var(--text);
+    padding-block: 24px 48px;
     padding-left: max(16px, env(safe-area-inset-left, 0px));
     padding-right: max(16px, env(safe-area-inset-right, 0px));
   }
-  main { width: 100%; max-width: 760px; margin: 0 auto; display: flex; flex-direction: column; gap: 40px; }
+  main { width: 100%; max-width: 720px; margin: 0 auto; display: flex; flex-direction: column; gap: 44px; }
   button { font: inherit; color: inherit; }
-  :focus-visible { outline: 2px solid var(--accent-ink); outline-offset: 3px; }
-  .mono { font-family: var(--mono); font-size: 13px; text-transform: uppercase; letter-spacing: .02em; }
+  :focus-visible { outline: 2px solid var(--mint); outline-offset: 3px; }
+  .mono { font-family: var(--mono); font-weight: 400; font-size: 13px; text-transform: uppercase; letter-spacing: .18em; }
 
   /* Masthead */
-  .top { display: flex; justify-content: space-between; align-items: baseline; gap: 16px; }
-  .mark { font-family: var(--display); font-weight: 800; font-size: 26px; letter-spacing: -0.045em; }
-  .mast { display: flex; flex-direction: column; gap: 14px; }
-  .display {
-    margin: 0; font-family: var(--display); font-weight: 800;
-    font-size: clamp(84px, 22vw, 184px); line-height: .82; letter-spacing: -0.06em;
-    display: flex; align-items: center; gap: .12em;
+  .top { display: flex; justify-content: center; align-items: center; gap: 12px; }
+  .logo { width: 30px; height: 30px; background: var(--ink); display: grid; place-items: center; }
+  .logo::before { content: ""; width: 18px; height: 18px; border-radius: 50%; background: var(--bg); }
+  .logo + span { font-family: var(--display); font-weight: 500; font-size: 20px; letter-spacing: -0.01em; }
+  .banner {
+    background: var(--mint); color: var(--mint-ink); border-radius: 8px;
+    padding: 12px 16px; display: flex; justify-content: space-between; align-items: center; gap: 12px;
   }
-  .display .dash { display: inline-block; width: .42em; height: .1em; background: var(--accent); }
-  .strap {
-    display: flex; justify-content: space-between; gap: 12px;
-    border-top: 1.5px solid var(--rule); border-bottom: 4px solid var(--rule);
-    padding: 6px 0;
+  .hero {
+    margin: 0; text-align: center; font-family: var(--display); font-weight: 300;
+    font-size: clamp(44px, 10vw, 84px); line-height: 1.02; letter-spacing: -0.035em; text-wrap: balance;
   }
 
-  /* Track rows */
-  .slots { display: flex; flex-direction: column; border-top: 1.5px solid var(--rule); }
+  /* Track cards */
+  .slots { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
   .slot {
-    position: relative;
-    display: grid; grid-template-columns: 76px minmax(0, 1fr) auto; gap: 4px 16px; align-items: start;
-    padding: 18px 12px 18px 0;
-    border-bottom: 1.5px solid var(--rule);
+    position: relative; min-width: 0;
+    border-radius: 24px; border: 1px solid var(--line); background: var(--chip);
+    padding: 20px 20px 22px; min-height: 210px;
+    display: flex; flex-direction: column; gap: 12px;
     cursor: pointer; user-select: none;
-    transition: background .15s, color .15s, padding .15s;
+    transition: background .2s, color .2s, border-color .2s, transform .2s;
   }
-  .slot .tag { font-family: var(--display); font-weight: 800; font-size: 22px; letter-spacing: -0.03em; }
-  .slot .body { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
-  .slot .name { font-family: var(--display); font-weight: 700; font-size: 22px; letter-spacing: -0.03em; line-height: 1.15; word-break: break-all; }
-  .slot:not(.loaded) .name::after { content: " →"; }
-  .slot .meta, .slot .loud { font-family: var(--mono); font-size: 12.5px; text-transform: uppercase; color: var(--muted); font-variant-numeric: tabular-nums; }
+  .slot:hover, .slot.drag { border-color: var(--muted); }
+  .slot .tag { color: var(--muted); }
+  .slot .body { display: flex; flex-direction: column; gap: 10px; min-width: 0; flex: 1; }
+  .slot .name { font-family: var(--display); font-weight: 400; font-size: 24px; line-height: 1.15; letter-spacing: -0.02em; word-break: break-all; }
+  .slot .meta { font-family: var(--mono); font-size: 11.5px; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); }
+  .slot .loud { display: flex; flex-direction: column; gap: 4px; margin-top: auto; font-variant-numeric: tabular-nums; }
   .slot .loud:empty { display: none; }
-  .slot .loud b { color: var(--ink); font-weight: 700; }
+  .slot .loud .big { font-family: var(--display); font-weight: 500; font-size: 38px; letter-spacing: -0.03em; line-height: 1; }
+  .slot .loud .big small { font-family: var(--mono); font-size: 12px; font-weight: 400; letter-spacing: .14em; color: var(--muted); margin-left: 6px; }
+  .slot .loud .sub { font-family: var(--mono); font-size: 11.5px; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); }
   .slot .loud .w { color: var(--warn); }
-  .slot:hover, .slot.drag { background: var(--surface); padding-left: 12px; }
-  .slot.active { background: var(--accent); color: var(--on-accent); padding-left: 12px; }
-  .slot.active .meta, .slot.active .loud, .slot.active .loud b, .slot.active .loud .w { color: var(--on-accent); }
+  .slot .loud .pf { color: var(--ink); }
+  .slot.active { background: var(--card); color: var(--card-ink); border-color: var(--card); }
+  .slot.active .tag, .slot.active .meta, .slot.active .loud .sub, .slot.active .loud .big small { color: var(--card-muted); }
+  .slot.active .loud .pf { color: var(--card-ink); }
+  .slot.active .loud .w { color: #9a5a00; }
   .slot .replace {
-    font-family: var(--mono); font-size: 12px; text-transform: uppercase;
-    background: none; border: 1px solid currentColor; border-radius: 999px; padding: 4px 12px; cursor: pointer;
+    position: absolute; top: 14px; right: 14px;
+    font-family: var(--mono); font-size: 11px; letter-spacing: .14em; text-transform: uppercase;
+    background: transparent; border: 1px solid currentColor; border-radius: 999px; padding: 5px 12px; cursor: pointer; opacity: .7;
   }
+  .slot .replace:hover { opacity: 1; }
   .slot:not(.loaded) .replace { display: none; }
+  .slot:not(.loaded) .name { color: var(--muted); }
   input[type=file] { display: none; }
 
   /* Transport */
-  .transport { display: flex; flex-direction: column; gap: 14px; }
-  .switch { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .transport { display: flex; flex-direction: column; align-items: center; gap: 22px; }
+  .switch { display: flex; gap: 14px; justify-content: center; }
   .switch button {
-    height: 116px; border: 1.5px solid var(--rule); background: transparent; cursor: pointer;
-    font-family: var(--display); font-weight: 800; font-size: 72px; letter-spacing: -0.05em; line-height: 1;
-    display: flex; align-items: flex-end; justify-content: space-between; padding: 10px 14px;
+    min-width: 128px; height: 56px; border-radius: 999px; cursor: pointer;
+    background: transparent; border: 1.5px solid var(--line); color: var(--muted);
+    font-family: var(--mono); font-size: 15px; letter-spacing: .2em; text-transform: uppercase;
   }
-  .switch button small { font-family: var(--mono); font-size: 12px; font-weight: 400; letter-spacing: .02em; align-self: flex-start; }
-  .switch button:disabled { cursor: default; opacity: .3; }
-  .switch button.on { background: var(--accent); border-color: var(--accent); color: var(--on-accent); }
-  .row { display: flex; align-items: center; gap: 12px; }
-  .between { justify-content: space-between; }
+  .switch button:hover:not(:disabled) { border-color: var(--muted); color: var(--ink); }
+  .switch button.on { border-color: var(--ink); color: var(--ink); }
+  .switch button:disabled { opacity: .35; cursor: default; }
   button.main {
-    flex: 1; height: 58px; border: none; border-radius: 999px; cursor: pointer;
-    background: var(--accent); color: var(--on-accent);
-    display: flex; align-items: center; justify-content: space-between; padding: 0 24px;
-    font-family: var(--mono); font-size: 17px;
+    width: 200px; height: 200px; border-radius: 50%; border: none; cursor: pointer;
+    background: radial-gradient(circle at 50% 50%, var(--coral) 62%, var(--coral-hi) 100%);
+    color: var(--ink); font-family: var(--display); font-weight: 300; font-size: 40px; letter-spacing: -0.02em;
+    box-shadow: 0 0 60px rgba(224, 96, 79, .28);
+    transition: transform .2s, box-shadow .2s;
   }
-  button.main:disabled { opacity: .35; cursor: default; }
-  .time { font-family: var(--digits); font-weight: 700; font-size: 26px; letter-spacing: .04em; font-variant-numeric: tabular-nums; white-space: nowrap; }
-  input[type=range] { flex: 1; min-width: 0; accent-color: var(--accent); }
+  button.main:hover:not(:disabled) { transform: scale(1.03); box-shadow: 0 0 80px rgba(224, 96, 79, .4); }
+  button.main.playing { box-shadow: 0 0 90px rgba(224, 96, 79, .5); }
+  button.main:disabled { opacity: .3; cursor: default; box-shadow: none; }
+  .time { color: var(--muted); font-variant-numeric: tabular-nums; }
+  .seekrow { width: 100%; display: flex; }
+  input[type=range] { flex: 1; min-width: 0; accent-color: var(--ink); }
+  .row { width: 100%; display: flex; align-items: center; justify-content: space-between; gap: 12px; }
   label.loop { display: flex; gap: 8px; align-items: center; cursor: pointer; color: var(--muted); }
-  label.loop input { accent-color: var(--accent); }
-  .warn { color: var(--warn); font-size: 13px; }
-  .warn:empty { display: none; }
+  label.loop input { accent-color: var(--mint); }
+  .warn { color: var(--warn); font-size: 14px; }
 
   /* Options */
   .opt { display: flex; flex-direction: column; }
-  .h2 { margin: 0 0 14px; font-family: var(--display); font-weight: 800; font-size: clamp(34px, 7vw, 48px); letter-spacing: -0.05em; line-height: 1; }
-  .seg { display: flex; flex-direction: column; border-top: 1.5px solid var(--rule); }
+  .h2 { margin: 0 0 8px; font-family: var(--display); font-weight: 300; font-size: clamp(40px, 8vw, 60px); letter-spacing: -0.035em; line-height: 1.05; }
+  .seg { display: flex; flex-direction: column; }
   .seg button {
-    display: flex; justify-content: space-between; align-items: baseline; gap: 16px;
-    background: none; border: none; border-bottom: 1.5px solid var(--rule);
-    padding: 12px 0; text-align: left; cursor: pointer;
-    font-family: var(--text); font-size: 20px; font-weight: 500; letter-spacing: -0.01em;
-    transition: padding .15s, background .15s;
+    display: flex; justify-content: space-between; align-items: center; gap: 16px;
+    background: none; border: none; border-bottom: 1px solid var(--line);
+    padding: 18px 0; text-align: left; cursor: pointer;
+    font-family: var(--text); font-weight: 300; font-size: 20px; color: var(--muted);
+    transition: color .15s;
   }
-  .seg button .d { font-family: var(--mono); font-size: 12px; text-transform: uppercase; color: var(--muted); text-align: right; }
-  .seg button:hover { padding-left: 10px; }
-  .seg button.on { color: var(--accent-ink); font-weight: 700; }
-  .seg button.on span:first-child::before { content: ""; display: inline-block; width: 10px; height: 10px; background: var(--accent); margin-right: 12px; vertical-align: .12em; }
-  .seg button.on .d { color: var(--accent-ink); }
-  .note { margin-top: 12px; color: var(--muted); font-size: 14px; max-width: 62ch; font-variant-numeric: tabular-nums; }
+  .seg button span:first-child::after { content: "›"; margin-left: 10px; opacity: .6; }
+  .seg button:hover { color: var(--ink); }
+  .seg button .d {
+    flex: none; font-family: var(--mono); font-size: 12px; letter-spacing: .14em; text-transform: uppercase;
+    background: var(--chip); border: 1px solid var(--line); border-radius: 10px; padding: 7px 12px; color: var(--muted);
+  }
+  .seg button.on { color: var(--ink); }
+  .seg button.on .d { background: var(--mint); border-color: var(--mint); color: var(--mint-ink); }
+  .note { margin-top: 16px; color: var(--muted); font-size: 16px; max-width: 60ch; font-variant-numeric: tabular-nums; }
   .note:empty { display: none; }
-  .note b { color: var(--ink); font-weight: 600; }
+  .note b { color: var(--ink); font-weight: 500; }
 
-  footer { display: flex; justify-content: space-between; flex-wrap: wrap; gap: 8px 16px; color: var(--muted); border-top: 1.5px solid var(--rule); padding-top: 10px; }
-  @media (max-width: 520px) {
-    .slot { grid-template-columns: 52px minmax(0, 1fr); }
-    .slot .replace { grid-column: 2; justify-self: start; margin-top: 6px; }
-    .switch button { height: 96px; font-size: 60px; }
+  footer { text-align: center; color: var(--muted); display: flex; flex-direction: column; gap: 8px; font-size: 15px; }
+  footer .keys { display: flex; justify-content: center; flex-wrap: wrap; gap: 6px 22px; }
+  @media (max-width: 560px) {
+    .slots { grid-template-columns: 1fr; }
+    .slot { min-height: 0; }
+    .switch button { min-width: 0; flex: 1; }
+    .switch { width: 100%; }
+    button.main { width: 168px; height: 168px; font-size: 34px; }
+    .banner { font-size: 11.5px; letter-spacing: .14em; }
     .seg button { font-size: 18px; }
   }
   @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
@@ -147,18 +151,15 @@
 </head>
 <body>
 <main>
-  <div class="mast">
-    <header class="top">
-      <div class="mark">Comparo</div>
-      <div class="mono" id="count">[0/2] fichiers</div>
-    </header>
-    <h1 class="display">A<span class="dash" aria-hidden="true"></span>B</h1>
-    <div class="strap mono"><span>Comparaison A/B</span><span>WAV · lecture synchronisée</span></div>
-  </div>
+  <header class="top"><div class="logo" aria-hidden="true"></div><span>COMPARO</span></header>
+
+  <div class="banner mono" id="banner"><span id="bannerText">Déposez deux fichiers .wav · A et B</span><span aria-hidden="true">↓</span></div>
+
+  <h1 class="hero">Entendre la différence entre A et B</h1>
 
   <section class="slots">
     <div class="slot" data-k="A">
-      <div class="tag">(A)</div>
+      <div class="tag mono">Piste A</div>
       <div class="body">
         <div class="name">Déposer un .wav ici</div>
         <div class="meta">ou cliquer pour choisir</div>
@@ -168,7 +169,7 @@
       <input type="file" id="fileA" accept=".wav,audio/wav,audio/x-wav,audio/wave">
     </div>
     <div class="slot" data-k="B">
-      <div class="tag">(B)</div>
+      <div class="tag mono">Piste B</div>
       <div class="body">
         <div class="name">Déposer un .wav ici</div>
         <div class="meta">ou cliquer pour choisir</div>
@@ -181,17 +182,13 @@
 
   <section class="transport">
     <div class="switch">
-      <button data-k="A" class="on" disabled>A<small>[1]</small></button>
-      <button data-k="B" disabled>B<small>[2]</small></button>
+      <button data-k="A" class="on" disabled>A</button>
+      <button data-k="B" disabled>B</button>
     </div>
+    <button class="main" id="play" disabled title="Lecture / Pause (Espace)">Lecture</button>
+    <div class="time mono" id="time">0:00 / 0:00</div>
+    <div class="seekrow"><input type="range" id="seek" min="0" max="1000" value="0" step="1" disabled aria-label="Position"></div>
     <div class="row">
-      <button class="main" id="play" disabled title="Lecture / Pause (Espace)"><span>Lecture</span><span>▶</span></button>
-      <div class="time" id="time">0:00/0:00</div>
-    </div>
-    <div class="row">
-      <input type="range" id="seek" min="0" max="1000" value="0" step="1" disabled aria-label="Position">
-    </div>
-    <div class="row between">
       <div class="warn" id="warn"></div>
       <label class="loop mono"><input type="checkbox" id="loop"> Boucle</label>
     </div>
@@ -200,19 +197,19 @@
   <section class="opt">
     <h2 class="h2">Écouter sur</h2>
     <div class="seg" id="sim">
-      <button data-v="off" class="on"><span>Studio (original)</span><span class="d">Sans traitement</span></button>
-      <button data-v="phone"><span>Haut-parleur de téléphone</span><span class="d">Mono · 500 Hz+</span></button>
-      <button data-v="earbuds"><span>Écouteurs bas de gamme</span><span class="d">Pic 4,5 kHz</span></button>
-      <button data-v="car"><span>Voiture</span><span class="d">+6 dB à 120 Hz</span></button>
-      <button data-v="bt"><span>Enceinte Bluetooth</span><span class="d">Mono · limiteur</span></button>
+      <button data-v="off" class="on"><span>Studio (original)</span><span class="d">Original</span></button>
+      <button data-v="phone"><span>Haut-parleur de téléphone</span><span class="d">Mono</span></button>
+      <button data-v="earbuds"><span>Écouteurs bas de gamme</span><span class="d">4,5 kHz</span></button>
+      <button data-v="car"><span>Voiture</span><span class="d">+6 dB grave</span></button>
+      <button data-v="bt"><span>Enceinte Bluetooth</span><span class="d">Limiteur</span></button>
     </div>
     <div class="note" id="simNote"></div>
   </section>
 
   <section class="opt">
-    <h2 class="h2">Normalisation streaming</h2>
+    <h2 class="h2">Normalisation</h2>
     <div class="seg" id="norm">
-      <button data-v="off" class="on"><span>Aucune</span><span class="d">Niveau d’origine</span></button>
+      <button data-v="off" class="on"><span>Aucune</span><span class="d">Origine</span></button>
       <button data-v="spotify"><span>Spotify</span><span class="d">−14 LUFS</span></button>
       <button data-v="apple"><span>Apple Music</span><span class="d">−16 LUFS</span></button>
       <button data-v="youtube"><span>YouTube</span><span class="d">−14 LUFS</span></button>
@@ -220,9 +217,9 @@
     <div class="note" id="normNote"></div>
   </section>
 
-  <footer class="mono">
-    <span>Espace lecture/pause · Tab ou ←→ basculer · A/B choisir</span>
-    <span>© 2026 Comparo</span>
+  <footer>
+    <div class="keys"><span>Espace : lecture</span><span>Tab : basculer A/B</span><span>A ou B : choisir</span></div>
+    <div>Comparo lit vos fichiers localement. Rien n’est envoyé sur Internet.</div>
   </footer>
 </main>
 
@@ -693,15 +690,18 @@ onmessage = e => {
 
   function updateTime() {
     const d = duration(), p = Math.min(position(), d);
-    timeEl.textContent = `${fmt(p)}/${fmt(d)}`;
+    timeEl.textContent = `${fmt(p)} / ${fmt(d)}`;
     if (!seeking) seek.value = d ? Math.round(p / d * 1000) : 0;
   }
   function updateUI() {
     const any = !!(tracks.A || tracks.B);
     playBtn.disabled = !any;
     seek.disabled = !any;
-    playBtn.innerHTML = playing ? '<span>Pause</span><span>❚❚</span>' : '<span>Lecture</span><span>▶</span>';
-    $('#count').textContent = `[${(tracks.A ? 1 : 0) + (tracks.B ? 1 : 0)}/2] fichiers`;
+    playBtn.textContent = playing ? 'Pause' : 'Lecture';
+    const n = (tracks.A ? 1 : 0) + (tracks.B ? 1 : 0);
+    $('#bannerText').textContent = n === 0 ? 'Déposez deux fichiers .wav · A et B'
+      : n === 1 ? `Ajoutez la piste ${tracks.A ? 'B' : 'A'} pour comparer`
+      : playing ? `Lecture · vous écoutez ${active}` : 'Prêt · Espace pour lire';
     if (!tracks[active] && any) { active = tracks.A ? 'A' : 'B'; setActive(active); return; }
     switchBtns.forEach(b => {
       b.disabled = !tracks[b.dataset.k];
@@ -723,8 +723,9 @@ onmessage = e => {
       if (!t) { el.textContent = ''; continue; }
       if (!t.meter) continue;   // keeps "Mesure du volume…"
       const { lufs, tp } = t.meter;
-      let html = `<b>${num(lufs)} LUFS</b> · <span class="${tp > -1 ? 'w' : ''}" title="${tp > -1 ? 'Crête au-dessus de −1 dBTP : risque de saturation après encodage' : ''}">${num(tp)} dBTP</span>`;
-      if (p) html += ` · ${p.label} : <b>${num(normGainDb(k), true)} dB</b>`;
+      let html = `<span class="big">${num(lufs)}<small>LUFS</small></span><span class="sub"><span class="${tp > -1 ? 'w' : ''}" title="${tp > -1 ? 'Crête au-dessus de −1 dBTP : risque de saturation après encodage' : ''}">True peak ${num(tp)} dBTP</span>`;
+      if (p) html += ` · <span class="pf">${p.label} ${num(normGainDb(k), true)} dB</span>`;
+      html += '</span>';
       el.innerHTML = html;
     }
 
@@ -750,7 +751,7 @@ onmessage = e => {
   seek.addEventListener('input', () => {
     seeking = true;
     const d = duration();
-    timeEl.textContent = `${fmt(seek.value / 1000 * d)}/${fmt(d)}`;
+    timeEl.textContent = `${fmt(seek.value / 1000 * d)} / ${fmt(d)}`;
   });
   seek.addEventListener('change', () => { seeking = false; seekTo(seek.value / 1000 * duration()); });
   slots.forEach(s => s.querySelector('.replace').addEventListener('click', e => {
