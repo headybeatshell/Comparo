@@ -4,189 +4,226 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Comparo</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@700;800&family=Inter:wght@400;500;600;700&family=Space+Mono:wght@400;700&family=Doto:wght@700&display=swap">
 <style>
-  :root { --bg: #111317; --panel: #1b1e24; --line: #2c3039; --text: #e8eaee; --muted: #8a909c; --a: #4f9dff; --b: #ff8a3d; --warn: #ffcf5c; --on: #ffffff; color-scheme: dark; }
-  @media (prefers-color-scheme: light) { :root:not([data-theme="dark"]) { --bg: #f3f4f7; --panel: #ffffff; --line: #d6d9e0; --text: #15181d; --muted: #5d6470; --a: #1f6fe0; --b: #d9601a; --warn: #9a6a00; --on: #ffffff; color-scheme: light; } }
-  :root[data-theme="light"] { --bg: #f3f4f7; --panel: #ffffff; --line: #d6d9e0; --text: #15181d; --muted: #5d6470; --a: #1f6fe0; --b: #d9601a; --warn: #9a6a00; --on: #ffffff; color-scheme: light; }
+  /* Layout: one ruled column, editorial grotesk + mono labels; carmine marks what is live (active track, playing state, selected option). */
+  :root {
+    --bg: #f0ede8; --surface: #e4ded5; --ink: #2b2b2b; --muted: #6f6a63;
+    --rule: #2b2b2b; --hair: #cdc6bc; --accent: #960018; --on-accent: #fbf3ee;
+    --accent-ink: #960018; --warn: #8a5a00; --dot: transparent;
+    --display: "Inter Tight", "Helvetica Neue", Arial, sans-serif;
+    --text: "Inter", "Helvetica Neue", Arial, sans-serif;
+    --mono: "Space Mono", ui-monospace, "SF Mono", Menlo, monospace;
+    --digits: "Doto", "Space Mono", ui-monospace, monospace;
+  }
+  @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+    --bg: #0b0b0b; --surface: #1c1c1c; --ink: #f1efec; --muted: #8f8b86;
+    --rule: #4a4847; --hair: #2a2928; --accent: #960018; --on-accent: #ffffff;
+    --accent-ink: #ef5d72; --warn: #ffcf5c; --dot: #262626; color-scheme: dark; } }
+  :root[data-theme="dark"] {
+    --bg: #0b0b0b; --surface: #1c1c1c; --ink: #f1efec; --muted: #8f8b86;
+    --rule: #4a4847; --hair: #2a2928; --accent: #960018; --on-accent: #ffffff;
+    --accent-ink: #ef5d72; --warn: #ffcf5c; --dot: #262626; color-scheme: dark; }
+
   * { box-sizing: border-box; }
   html, body { margin: 0; min-height: 100%; }
   body {
     background: var(--bg);
-    color: var(--text);
-    font: 15px/1.4 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding-block: 16px;
+    background-image: radial-gradient(var(--dot) 1.2px, transparent 1.6px);
+    background-size: 18px 18px;
+    color: var(--ink);
+    font: 16px/1.45 var(--text);
+    padding-block: 28px 40px;
     padding-left: max(16px, env(safe-area-inset-left, 0px));
     padding-right: max(16px, env(safe-area-inset-right, 0px));
   }
-  main { width: 100%; max-width: 720px; }
-  h1 { font-size: 18px; font-weight: 600; margin: 0 0 20px; letter-spacing: .02em; }
-  h1 span { color: var(--muted); font-weight: 400; }
+  main { width: 100%; max-width: 760px; margin: 0 auto; display: flex; flex-direction: column; gap: 40px; }
+  button { font: inherit; color: inherit; }
+  :focus-visible { outline: 2px solid var(--accent-ink); outline-offset: 3px; }
+  .mono { font-family: var(--mono); font-size: 13px; text-transform: uppercase; letter-spacing: .02em; }
 
-  .slots { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  /* Masthead */
+  .top { display: flex; justify-content: space-between; align-items: baseline; gap: 16px; }
+  .mark { font-family: var(--display); font-weight: 800; font-size: 26px; letter-spacing: -0.045em; }
+  .mast { display: flex; flex-direction: column; gap: 14px; }
+  .display {
+    margin: 0; font-family: var(--display); font-weight: 800;
+    font-size: clamp(84px, 22vw, 184px); line-height: .82; letter-spacing: -0.06em;
+    display: flex; align-items: center; gap: .12em;
+  }
+  .display .dash { display: inline-block; width: .42em; height: .1em; background: var(--accent); }
+  .strap {
+    display: flex; justify-content: space-between; gap: 12px;
+    border-top: 1.5px solid var(--rule); border-bottom: 4px solid var(--rule);
+    padding: 6px 0;
+  }
+
+  /* Track rows */
+  .slots { display: flex; flex-direction: column; border-top: 1.5px solid var(--rule); }
   .slot {
     position: relative;
-    background: var(--panel);
-    border: 2px dashed var(--line);
-    border-radius: 12px;
-    padding: 18px 16px;
-    min-height: 120px;
-    min-width: 0;
-    cursor: pointer;
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
-    transition: border-color .15s, background .15s;
-    user-select: none;
+    display: grid; grid-template-columns: 76px minmax(0, 1fr) auto; gap: 4px 16px; align-items: start;
+    padding: 18px 12px 18px 0;
+    border-bottom: 1.5px solid var(--rule);
+    cursor: pointer; user-select: none;
+    transition: background .15s, color .15s, padding .15s;
   }
-  .slot:hover, .slot.drag { border-color: var(--muted); }
-  .slot.loaded { border-style: solid; }
-  .slot.active[data-k="A"] { border-color: var(--a); background: color-mix(in srgb, var(--a) 12%, var(--panel)); }
-  .slot.active[data-k="B"] { border-color: var(--b); background: color-mix(in srgb, var(--b) 12%, var(--panel)); }
-  .slot .letter { font-size: 34px; font-weight: 700; line-height: 1; }
-  .slot[data-k="A"] .letter { color: var(--a); }
-  .slot[data-k="B"] .letter { color: var(--b); }
-  .slot .name { font-weight: 600; word-break: break-all; }
-  .slot .meta, .slot .loud { color: var(--muted); font-size: 13px; font-variant-numeric: tabular-nums; }
+  .slot .tag { font-family: var(--display); font-weight: 800; font-size: 22px; letter-spacing: -0.03em; }
+  .slot .body { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+  .slot .name { font-family: var(--display); font-weight: 700; font-size: 22px; letter-spacing: -0.03em; line-height: 1.15; word-break: break-all; }
+  .slot:not(.loaded) .name::after { content: " →"; }
+  .slot .meta, .slot .loud { font-family: var(--mono); font-size: 12.5px; text-transform: uppercase; color: var(--muted); font-variant-numeric: tabular-nums; }
   .slot .loud:empty { display: none; }
-  .slot .loud b { color: var(--text); font-weight: 600; }
+  .slot .loud b { color: var(--ink); font-weight: 700; }
   .slot .loud .w { color: var(--warn); }
+  .slot:hover, .slot.drag { background: var(--surface); padding-left: 12px; }
+  .slot.active { background: var(--accent); color: var(--on-accent); padding-left: 12px; }
+  .slot.active .meta, .slot.active .loud, .slot.active .loud b, .slot.active .loud .w { color: var(--on-accent); }
   .slot .replace {
-    position: absolute; top: 10px; right: 10px;
-    background: none; border: 1px solid var(--line); color: var(--muted);
-    border-radius: 6px; font-size: 12px; padding: 3px 8px; cursor: pointer;
+    font-family: var(--mono); font-size: 12px; text-transform: uppercase;
+    background: none; border: 1px solid currentColor; border-radius: 999px; padding: 4px 12px; cursor: pointer;
   }
-  .slot .replace:hover { color: var(--text); border-color: var(--muted); }
   .slot:not(.loaded) .replace { display: none; }
   input[type=file] { display: none; }
 
-  .panel {
-    margin-top: 16px;
-    background: var(--panel);
-    border: 1px solid var(--line);
-    border-radius: 12px;
-    padding: 16px;
-    display: flex;
-    flex-direction: column;
-    gap: 14px;
-  }
-  .row { display: flex; align-items: center; gap: 12px; }
-  button.main:focus-visible, .switch button:focus-visible, .seg button:focus-visible { outline: 2px solid var(--muted); outline-offset: 2px; }
-  button.main {
-    width: 56px; height: 56px; border-radius: 50%;
-    border: none; background: var(--text); color: var(--bg);
-    font-size: 22px; cursor: pointer; flex: none;
-    display: grid; place-items: center;
-  }
-  button.main:disabled { opacity: .3; cursor: default; }
-  .switch {
-    flex: 1; display: grid; grid-template-columns: 1fr 1fr;
-    border: 1px solid var(--line); border-radius: 10px; overflow: hidden; height: 56px;
-  }
+  /* Transport */
+  .transport { display: flex; flex-direction: column; gap: 14px; }
+  .switch { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
   .switch button {
-    border: none; background: transparent; color: var(--muted);
-    font-size: 22px; font-weight: 700; cursor: pointer;
+    height: 116px; border: 1.5px solid var(--rule); background: transparent; cursor: pointer;
+    font-family: var(--display); font-weight: 800; font-size: 72px; letter-spacing: -0.05em; line-height: 1;
+    display: flex; align-items: flex-end; justify-content: space-between; padding: 10px 14px;
   }
-  .switch button:disabled { cursor: default; opacity: .4; }
-  .switch button.on[data-k="A"] { background: var(--a); color: var(--on); }
-  .switch button.on[data-k="B"] { background: var(--b); color: var(--on); }
-  .time { font-variant-numeric: tabular-nums; color: var(--muted); font-size: 13px; min-width: 92px; text-align: right; }
-  input[type=range] { flex: 1; min-width: 0; accent-color: var(--text); }
-  label.loop { color: var(--muted); font-size: 13px; display: flex; gap: 6px; align-items: center; cursor: pointer; }
-  .warn { color: var(--warn); font-size: 13px; min-height: 1em; }
+  .switch button small { font-family: var(--mono); font-size: 12px; font-weight: 400; letter-spacing: .02em; align-self: flex-start; }
+  .switch button:disabled { cursor: default; opacity: .3; }
+  .switch button.on { background: var(--accent); border-color: var(--accent); color: var(--on-accent); }
+  .row { display: flex; align-items: center; gap: 12px; }
+  .between { justify-content: space-between; }
+  button.main {
+    flex: 1; height: 58px; border: none; border-radius: 999px; cursor: pointer;
+    background: var(--accent); color: var(--on-accent);
+    display: flex; align-items: center; justify-content: space-between; padding: 0 24px;
+    font-family: var(--mono); font-size: 17px;
+  }
+  button.main:disabled { opacity: .35; cursor: default; }
+  .time { font-family: var(--digits); font-weight: 700; font-size: 26px; letter-spacing: .04em; font-variant-numeric: tabular-nums; white-space: nowrap; }
+  input[type=range] { flex: 1; min-width: 0; accent-color: var(--accent); }
+  label.loop { display: flex; gap: 8px; align-items: center; cursor: pointer; color: var(--muted); }
+  label.loop input { accent-color: var(--accent); }
+  .warn { color: var(--warn); font-size: 13px; }
+  .warn:empty { display: none; }
 
-  .opt { display: flex; flex-direction: column; gap: 8px; }
-  .opt + .opt { border-top: 1px solid var(--line); padding-top: 14px; }
-  .opt-label { font-size: 12px; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); }
-  .seg { display: flex; flex-wrap: wrap; gap: 6px; }
+  /* Options */
+  .opt { display: flex; flex-direction: column; }
+  .h2 { margin: 0 0 14px; font-family: var(--display); font-weight: 800; font-size: clamp(34px, 7vw, 48px); letter-spacing: -0.05em; line-height: 1; }
+  .seg { display: flex; flex-direction: column; border-top: 1.5px solid var(--rule); }
   .seg button {
-    border: 1px solid var(--line); background: transparent; color: var(--text);
-    border-radius: 8px; padding: 7px 12px; font: inherit; font-size: 14px; cursor: pointer;
+    display: flex; justify-content: space-between; align-items: baseline; gap: 16px;
+    background: none; border: none; border-bottom: 1.5px solid var(--rule);
+    padding: 12px 0; text-align: left; cursor: pointer;
+    font-family: var(--text); font-size: 20px; font-weight: 500; letter-spacing: -0.01em;
+    transition: padding .15s, background .15s;
   }
-  .seg button:hover { border-color: var(--muted); }
-  .seg button.on { background: var(--text); color: var(--bg); border-color: var(--text); }
-  .note { color: var(--muted); font-size: 13px; font-variant-numeric: tabular-nums; }
+  .seg button .d { font-family: var(--mono); font-size: 12px; text-transform: uppercase; color: var(--muted); text-align: right; }
+  .seg button:hover { padding-left: 10px; }
+  .seg button.on { color: var(--accent-ink); font-weight: 700; }
+  .seg button.on span:first-child::before { content: ""; display: inline-block; width: 10px; height: 10px; background: var(--accent); margin-right: 12px; vertical-align: .12em; }
+  .seg button.on .d { color: var(--accent-ink); }
+  .note { margin-top: 12px; color: var(--muted); font-size: 14px; max-width: 62ch; font-variant-numeric: tabular-nums; }
   .note:empty { display: none; }
-  .note b { color: var(--text); font-weight: 600; }
+  .note b { color: var(--ink); font-weight: 600; }
 
-  .hint { color: var(--muted); font-size: 12px; text-align: center; margin-top: 14px; }
-  kbd {
-    border: 1px solid var(--line); border-bottom-width: 2px; border-radius: 4px;
-    padding: 0 5px; font: 11px ui-monospace, monospace; color: var(--text);
+  footer { display: flex; justify-content: space-between; flex-wrap: wrap; gap: 8px 16px; color: var(--muted); border-top: 1.5px solid var(--rule); padding-top: 10px; }
+  @media (max-width: 520px) {
+    .slot { grid-template-columns: 52px minmax(0, 1fr); }
+    .slot .replace { grid-column: 2; justify-self: start; margin-top: 6px; }
+    .switch button { height: 96px; font-size: 60px; }
+    .seg button { font-size: 18px; }
   }
-  @media (max-width: 520px) { .slots { grid-template-columns: 1fr; } }
+  @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
 </style>
 </head>
 <body>
 <main>
-  <h1>Comparo <span>— comparaison A/B</span></h1>
+  <div class="mast">
+    <header class="top">
+      <div class="mark">Comparo</div>
+      <div class="mono" id="count">[0/2] fichiers</div>
+    </header>
+    <h1 class="display">A<span class="dash" aria-hidden="true"></span>B</h1>
+    <div class="strap mono"><span>Comparaison A/B</span><span>WAV · lecture synchronisée</span></div>
+  </div>
 
-  <div class="slots">
+  <section class="slots">
     <div class="slot" data-k="A">
-      <div class="letter">A</div>
-      <div class="name">Déposer un .wav ici</div>
-      <div class="meta">ou cliquer pour choisir</div>
-      <div class="loud"></div>
+      <div class="tag">(A)</div>
+      <div class="body">
+        <div class="name">Déposer un .wav ici</div>
+        <div class="meta">ou cliquer pour choisir</div>
+        <div class="loud"></div>
+      </div>
       <button class="replace" type="button">Changer</button>
       <input type="file" id="fileA" accept=".wav,audio/wav,audio/x-wav,audio/wave">
     </div>
     <div class="slot" data-k="B">
-      <div class="letter">B</div>
-      <div class="name">Déposer un .wav ici</div>
-      <div class="meta">ou cliquer pour choisir</div>
-      <div class="loud"></div>
+      <div class="tag">(B)</div>
+      <div class="body">
+        <div class="name">Déposer un .wav ici</div>
+        <div class="meta">ou cliquer pour choisir</div>
+        <div class="loud"></div>
+      </div>
       <button class="replace" type="button">Changer</button>
       <input type="file" id="fileB" accept=".wav,audio/wav,audio/x-wav,audio/wave">
     </div>
-  </div>
+  </section>
 
-  <div class="panel">
-    <div class="row">
-      <button class="main" id="play" disabled title="Lecture / Pause (Espace)">▶</button>
-      <div class="switch">
-        <button data-k="A" class="on" disabled>A</button>
-        <button data-k="B" disabled>B</button>
-      </div>
+  <section class="transport">
+    <div class="switch">
+      <button data-k="A" class="on" disabled>A<small>[1]</small></button>
+      <button data-k="B" disabled>B<small>[2]</small></button>
     </div>
     <div class="row">
-      <input type="range" id="seek" min="0" max="1000" value="0" step="1" disabled>
-      <div class="time" id="time">0:00 / 0:00</div>
+      <button class="main" id="play" disabled title="Lecture / Pause (Espace)"><span>Lecture</span><span>▶</span></button>
+      <div class="time" id="time">0:00/0:00</div>
     </div>
-    <div class="row" style="justify-content: space-between">
+    <div class="row">
+      <input type="range" id="seek" min="0" max="1000" value="0" step="1" disabled aria-label="Position">
+    </div>
+    <div class="row between">
       <div class="warn" id="warn"></div>
-      <label class="loop"><input type="checkbox" id="loop"> Boucle</label>
+      <label class="loop mono"><input type="checkbox" id="loop"> Boucle</label>
     </div>
-  </div>
+  </section>
 
-  <div class="panel">
-    <div class="opt">
-      <div class="opt-label">Écouter sur</div>
-      <div class="seg" id="sim">
-        <button data-v="off" class="on">Studio (original)</button>
-        <button data-v="phone">Haut-parleur de téléphone</button>
-        <button data-v="earbuds">Écouteurs bas de gamme</button>
-        <button data-v="car">Voiture</button>
-        <button data-v="bt">Enceinte Bluetooth</button>
-      </div>
-      <div class="note" id="simNote"></div>
+  <section class="opt">
+    <h2 class="h2">Écouter sur</h2>
+    <div class="seg" id="sim">
+      <button data-v="off" class="on"><span>Studio (original)</span><span class="d">Sans traitement</span></button>
+      <button data-v="phone"><span>Haut-parleur de téléphone</span><span class="d">Mono · 500 Hz+</span></button>
+      <button data-v="earbuds"><span>Écouteurs bas de gamme</span><span class="d">Pic 4,5 kHz</span></button>
+      <button data-v="car"><span>Voiture</span><span class="d">+6 dB à 120 Hz</span></button>
+      <button data-v="bt"><span>Enceinte Bluetooth</span><span class="d">Mono · limiteur</span></button>
     </div>
-    <div class="opt">
-      <div class="opt-label">Normalisation streaming</div>
-      <div class="seg" id="norm">
-        <button data-v="off" class="on">Aucune</button>
-        <button data-v="spotify">Spotify</button>
-        <button data-v="apple">Apple Music</button>
-        <button data-v="youtube">YouTube</button>
-      </div>
-      <div class="note" id="normNote"></div>
-    </div>
-  </div>
+    <div class="note" id="simNote"></div>
+  </section>
 
-  <div class="hint">
-    <kbd>Espace</kbd> lecture/pause · <kbd>Tab</kbd> ou <kbd>←</kbd><kbd>→</kbd> basculer A/B · <kbd>A</kbd> / <kbd>B</kbd> choisir directement
-  </div>
+  <section class="opt">
+    <h2 class="h2">Normalisation streaming</h2>
+    <div class="seg" id="norm">
+      <button data-v="off" class="on"><span>Aucune</span><span class="d">Niveau d’origine</span></button>
+      <button data-v="spotify"><span>Spotify</span><span class="d">−14 LUFS</span></button>
+      <button data-v="apple"><span>Apple Music</span><span class="d">−16 LUFS</span></button>
+      <button data-v="youtube"><span>YouTube</span><span class="d">−14 LUFS</span></button>
+    </div>
+    <div class="note" id="normNote"></div>
+  </section>
+
+  <footer class="mono">
+    <span>Espace lecture/pause · Tab ou ←→ basculer · A/B choisir</span>
+    <span>© 2026 Comparo</span>
+  </footer>
 </main>
 
 <!-- Loudness meter (ITU-R BS.1770-4 integrated loudness + 4x oversampled true peak), run in a worker -->
@@ -656,20 +693,22 @@ onmessage = e => {
 
   function updateTime() {
     const d = duration(), p = Math.min(position(), d);
-    timeEl.textContent = `${fmt(p)} / ${fmt(d)}`;
+    timeEl.textContent = `${fmt(p)}/${fmt(d)}`;
     if (!seeking) seek.value = d ? Math.round(p / d * 1000) : 0;
   }
   function updateUI() {
     const any = !!(tracks.A || tracks.B);
     playBtn.disabled = !any;
     seek.disabled = !any;
-    playBtn.textContent = playing ? '❚❚' : '▶';
+    playBtn.innerHTML = playing ? '<span>Pause</span><span>❚❚</span>' : '<span>Lecture</span><span>▶</span>';
+    $('#count').textContent = `[${(tracks.A ? 1 : 0) + (tracks.B ? 1 : 0)}/2] fichiers`;
     if (!tracks[active] && any) { active = tracks.A ? 'A' : 'B'; setActive(active); return; }
     switchBtns.forEach(b => {
       b.disabled = !tracks[b.dataset.k];
       b.classList.toggle('on', b.dataset.k === active);
     });
     slots.forEach(s => s.classList.toggle('active', s.dataset.k === active && !!tracks[s.dataset.k]));
+    playBtn.classList.toggle('playing', playing);
     updateTime();
   }
 
@@ -711,7 +750,7 @@ onmessage = e => {
   seek.addEventListener('input', () => {
     seeking = true;
     const d = duration();
-    timeEl.textContent = `${fmt(seek.value / 1000 * d)} / ${fmt(d)}`;
+    timeEl.textContent = `${fmt(seek.value / 1000 * d)}/${fmt(d)}`;
   });
   seek.addEventListener('change', () => { seeking = false; seekTo(seek.value / 1000 * duration()); });
   slots.forEach(s => s.querySelector('.replace').addEventListener('click', e => {
