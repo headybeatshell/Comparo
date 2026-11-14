@@ -129,6 +129,8 @@
     background: var(--chip); border: 1px solid var(--line); border-radius: 10px; padding: 7px 12px; color: var(--muted);
   }
   .seg button.on { color: var(--ink); }
+  .seg button .dot { flex: none; width: 10px; height: 10px; border-radius: 50%; background: transparent; }
+  .seg button.on .dot { background: var(--mint); }
   .seg button.on .d { background: var(--mint); border-color: var(--mint); color: var(--mint-ink); }
   .note { margin-top: 16px; color: var(--muted); font-size: 16px; max-width: 60ch; font-variant-numeric: tabular-nums; }
   .note:empty { display: none; }
@@ -152,7 +154,7 @@
 <main>
   <header class="top"><div class="logo" aria-hidden="true"></div><span>COMPARO</span></header>
 
-  <div class="banner mono" id="banner"><span id="bannerText">Déposez deux fichiers .wav · A et B</span><span aria-hidden="true">↓</span></div>
+  <div class="banner mono" id="banner"><span id="bannerText">Déposez deux fichiers · A et B</span><span aria-hidden="true">↓</span></div>
 
   <h1 class="hero">Entendre la différence entre A et B</h1>
 
@@ -196,11 +198,11 @@
   <section class="opt">
     <h2 class="h2">Écouter sur</h2>
     <div class="seg" id="sim">
-      <button data-v="off" class="on"><span>Studio (original)</span><span class="d">Original</span></button>
-      <button data-v="phone"><span>Haut-parleur de téléphone</span><span class="d">Mono</span></button>
-      <button data-v="earbuds"><span>Écouteurs bas de gamme</span><span class="d">4,5 kHz</span></button>
-      <button data-v="car"><span>Voiture</span><span class="d">+6 dB grave</span></button>
-      <button data-v="bt"><span>Enceinte Bluetooth</span><span class="d">Limiteur</span></button>
+      <button data-v="off" class="on"><span>Studio (original)</span><span class="dot" aria-hidden="true"></span></button>
+      <button data-v="phone"><span>Haut-parleur de téléphone</span><span class="dot" aria-hidden="true"></span></button>
+      <button data-v="earbuds"><span>Écouteurs bas de gamme</span><span class="dot" aria-hidden="true"></span></button>
+      <button data-v="car"><span>Voiture</span><span class="dot" aria-hidden="true"></span></button>
+      <button data-v="bt"><span>Enceinte Bluetooth</span><span class="dot" aria-hidden="true"></span></button>
     </div>
     <div class="note" id="simNote"></div>
   </section>
@@ -698,7 +700,7 @@ onmessage = e => {
     seek.disabled = !any;
     playBtn.textContent = playing ? 'Pause' : 'Lecture';
     const n = (tracks.A ? 1 : 0) + (tracks.B ? 1 : 0);
-    $('#bannerText').textContent = n === 0 ? 'Déposez deux fichiers .wav · A et B'
+    $('#bannerText').textContent = n === 0 ? 'Déposez deux fichiers · A et B'
       : n === 1 ? `Ajoutez la piste ${tracks.A ? 'B' : 'A'} pour comparer`
       : playing ? `Lecture · vous écoutez ${active}` : 'Prêt · Espace pour lire';
     if (!tracks[active] && any) { active = tracks.A ? 'A' : 'B'; setActive(active); return; }
