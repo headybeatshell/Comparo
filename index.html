@@ -1,0 +1,425 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Comparo — A/B audio</title>
+<style>
+  :root {
+    --bg: #111317;
+    --panel: #1b1e24;
+    --line: #2c3039;
+    --text: #e8eaee;
+    --muted: #8a909c;
+    --a: #4f9dff;
+    --b: #ff8a3d;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; height: 100%; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font: 15px/1.4 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 16px;
+  }
+  main { width: 100%; max-width: 720px; }
+  h1 { font-size: 18px; font-weight: 600; margin: 0 0 20px; letter-spacing: .02em; }
+  h1 span { color: var(--muted); font-weight: 400; }
+
+  .slots { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .slot {
+    position: relative;
+    background: var(--panel);
+    border: 2px dashed var(--line);
+    border-radius: 12px;
+    padding: 18px 16px;
+    min-height: 120px;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    transition: border-color .15s, background .15s;
+    user-select: none;
+  }
+  .slot:hover, .slot.drag { border-color: var(--muted); }
+  .slot.loaded { border-style: solid; }
+  .slot.active[data-k="A"] { border-color: var(--a); background: color-mix(in srgb, var(--a) 12%, var(--panel)); }
+  .slot.active[data-k="B"] { border-color: var(--b); background: color-mix(in srgb, var(--b) 12%, var(--panel)); }
+  .slot .letter { font-size: 34px; font-weight: 700; line-height: 1; }
+  .slot[data-k="A"] .letter { color: var(--a); }
+  .slot[data-k="B"] .letter { color: var(--b); }
+  .slot .name { font-weight: 600; word-break: break-all; }
+  .slot .meta { color: var(--muted); font-size: 13px; }
+  .slot .replace {
+    position: absolute; top: 10px; right: 10px;
+    background: none; border: 1px solid var(--line); color: var(--muted);
+    border-radius: 6px; font-size: 12px; padding: 3px 8px; cursor: pointer;
+  }
+  .slot .replace:hover { color: var(--text); border-color: var(--muted); }
+  .slot:not(.loaded) .replace { display: none; }
+  input[type=file] { display: none; }
+
+  .transport {
+    margin-top: 16px;
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+  .row { display: flex; align-items: center; gap: 12px; }
+  button.main {
+    width: 56px; height: 56px; border-radius: 50%;
+    border: none; background: var(--text); color: var(--bg);
+    font-size: 22px; cursor: pointer; flex: none;
+    display: grid; place-items: center;
+  }
+  button.main:disabled { opacity: .3; cursor: default; }
+  .switch {
+    flex: 1; display: grid; grid-template-columns: 1fr 1fr;
+    border: 1px solid var(--line); border-radius: 10px; overflow: hidden; height: 56px;
+  }
+  .switch button {
+    border: none; background: transparent; color: var(--muted);
+    font-size: 22px; font-weight: 700; cursor: pointer;
+  }
+  .switch button:disabled { cursor: default; opacity: .4; }
+  .switch button.on[data-k="A"] { background: var(--a); color: #fff; }
+  .switch button.on[data-k="B"] { background: var(--b); color: #fff; }
+  .time { font-variant-numeric: tabular-nums; color: var(--muted); font-size: 13px; min-width: 92px; text-align: right; }
+  input[type=range] { flex: 1; accent-color: var(--text); }
+  label.loop { color: var(--muted); font-size: 13px; display: flex; gap: 6px; align-items: center; cursor: pointer; }
+  .hint { color: var(--muted); font-size: 12px; text-align: center; margin-top: 14px; }
+  kbd {
+    border: 1px solid var(--line); border-bottom-width: 2px; border-radius: 4px;
+    padding: 0 5px; font: 11px ui-monospace, monospace; color: var(--text);
+  }
+  .warn { color: #ffcf5c; font-size: 13px; min-height: 1em; }
+  @media (max-width: 520px) { .slots { grid-template-columns: 1fr; } }
+</style>
+</head>
+<body>
+<main>
+  <h1>Comparo <span>— comparaison A/B</span></h1>
+
+  <div class="slots">
+    <div class="slot" data-k="A">
+      <div class="letter">A</div>
+      <div class="name">Déposer un .wav ici</div>
+      <div class="meta">ou cliquer pour choisir</div>
+      <button class="replace" type="button">Changer</button>
+      <input type="file" accept=".wav,audio/wav,audio/x-wav,audio/wave">
+    </div>
+    <div class="slot" data-k="B">
+      <div class="letter">B</div>
+      <div class="name">Déposer un .wav ici</div>
+      <div class="meta">ou cliquer pour choisir</div>
+      <button class="replace" type="button">Changer</button>
+      <input type="file" accept=".wav,audio/wav,audio/x-wav,audio/wave">
+    </div>
+  </div>
+
+  <div class="transport">
+    <div class="row">
+      <button class="main" id="play" disabled title="Lecture / Pause (Espace)">▶</button>
+      <div class="switch">
+        <button data-k="A" class="on" disabled>A</button>
+        <button data-k="B" disabled>B</button>
+      </div>
+    </div>
+    <div class="row">
+      <input type="range" id="seek" min="0" max="1000" value="0" step="1" disabled>
+      <div class="time" id="time">0:00 / 0:00</div>
+    </div>
+    <div class="row" style="justify-content: space-between">
+      <div class="warn" id="warn"></div>
+      <label class="loop"><input type="checkbox" id="loop"> Boucle</label>
+    </div>
+  </div>
+
+  <div class="hint">
+    <kbd>Espace</kbd> lecture/pause · <kbd>Tab</kbd> ou <kbd>←</kbd><kbd>→</kbd> basculer A/B · <kbd>A</kbd> / <kbd>B</kbd> choisir directement
+  </div>
+</main>
+
+<script>
+(() => {
+  // ---------- State ----------
+  const tracks = { A: null, B: null };   // { name, bytes, info, buffer }
+  let ctx = null;
+  let gains = {};
+  let sources = [];
+  let active = 'A';
+  let playing = false;
+  let startCtxTime = 0;   // ctx time corresponding to offset 0
+  let pauseOffset = 0;    // seconds
+  let raf = 0;
+  let seeking = false;
+
+  const $ = s => document.querySelector(s);
+  const playBtn = $('#play');
+  const seek = $('#seek');
+  const timeEl = $('#time');
+  const warnEl = $('#warn');
+  const loopEl = $('#loop');
+  const switchBtns = [...document.querySelectorAll('.switch button')];
+  const slots = [...document.querySelectorAll('.slot')];
+
+  // ---------- WAV header parsing (to keep the native sample rate) ----------
+  function parseWav(buf) {
+    const v = new DataView(buf);
+    const tag = o => String.fromCharCode(v.getUint8(o), v.getUint8(o+1), v.getUint8(o+2), v.getUint8(o+3));
+    if (buf.byteLength < 12 || !['RIFF','RF64'].includes(tag(0)) || tag(8) !== 'WAVE') return null;
+    let o = 12;
+    while (o + 8 <= buf.byteLength) {
+      const id = tag(o), size = v.getUint32(o + 4, true);
+      if (id === 'fmt ') {
+        return {
+          format: v.getUint16(o + 8, true),
+          channels: v.getUint16(o + 10, true),
+          sampleRate: v.getUint32(o + 12, true),
+          bits: v.getUint16(o + 22, true),
+        };
+      }
+      o += 8 + size + (size & 1);
+    }
+    return null;
+  }
+
+  // ---------- Audio context ----------
+  // The context runs at the files' native sample rate so the browser never resamples them.
+  // Gain on the audible track is exactly 1.0: samples reach the output untouched.
+  function targetRate() {
+    const t = tracks.A || tracks.B;
+    return t && t.info ? t.info.sampleRate : undefined;
+  }
+
+  async function ensureContext() {
+    const rate = targetRate();
+    if (ctx && (!rate || ctx.sampleRate === rate)) return;
+    if (ctx) { stopSources(); await ctx.close(); }
+    try { ctx = new AudioContext({ sampleRate: rate, latencyHint: 'playback' }); }
+    catch { ctx = new AudioContext({ latencyHint: 'playback' }); }
+    gains = {};
+    for (const k of ['A', 'B']) {
+      const g = ctx.createGain();
+      g.gain.value = k === active ? 1 : 0;
+      g.connect(ctx.destination);
+      gains[k] = g;
+    }
+    // Decoded buffers belong to the old rate: redo them
+    for (const k of ['A', 'B']) if (tracks[k]) tracks[k].buffer = null;
+  }
+
+  async function decodeAll() {
+    await ensureContext();
+    for (const k of ['A', 'B']) {
+      const t = tracks[k];
+      if (t && !t.buffer) t.buffer = await ctx.decodeAudioData(t.bytes.slice(0));
+    }
+  }
+
+  // ---------- Loading ----------
+  async function loadFile(k, file) {
+    if (!file) return;
+    const wasPlaying = playing;
+    if (playing) pause();
+    const slot = slots.find(s => s.dataset.k === k);
+    slot.querySelector('.name').textContent = file.name;
+    slot.querySelector('.meta').textContent = 'Chargement…';
+    try {
+      const bytes = await file.arrayBuffer();
+      const info = parseWav(bytes);
+      tracks[k] = { name: file.name, bytes, info, buffer: null };
+      await decodeAll();
+      const b = tracks[k].buffer;
+      const parts = [];
+      if (info) {
+        parts.push((info.sampleRate / 1000).toLocaleString('fr-FR') + ' kHz');
+        parts.push(info.format === 3 ? info.bits + ' bit float' : info.bits + ' bit');
+        parts.push(info.channels === 1 ? 'mono' : info.channels === 2 ? 'stéréo' : info.channels + ' canaux');
+      }
+      parts.push(fmt(b.duration));
+      slot.querySelector('.meta').textContent = parts.join(' · ');
+      slot.classList.add('loaded');
+      slot.title = file.name;
+    } catch (e) {
+      tracks[k] = null;
+      slot.classList.remove('loaded');
+      slot.querySelector('.meta').textContent = 'Fichier illisible';
+      console.error(e);
+    }
+    updateWarn();
+    updateUI();
+    if (wasPlaying) play();
+  }
+
+  function updateWarn() {
+    const a = tracks.A?.info, b = tracks.B?.info;
+    const msgs = [];
+    if (ctx && targetRate() && ctx.sampleRate !== targetRate())
+      msgs.push(`Le navigateur ne supporte pas ${targetRate()} Hz : rééchantillonnage à ${ctx.sampleRate} Hz.`);
+    if (a && b && a.sampleRate !== b.sampleRate)
+      msgs.push(`Fréquences différentes (${a.sampleRate} / ${b.sampleRate} Hz) : B est rééchantillonné.`);
+    warnEl.textContent = msgs.join(' ');
+  }
+
+  slots.forEach(slot => {
+    const k = slot.dataset.k;
+    const input = slot.querySelector('input');
+    slot.addEventListener('click', e => { if (e.target !== input) input.click(); });
+    input.addEventListener('change', () => { loadFile(k, input.files[0]); input.value = ''; });
+    slot.addEventListener('dragover', e => { e.preventDefault(); slot.classList.add('drag'); });
+    slot.addEventListener('dragleave', () => slot.classList.remove('drag'));
+    slot.addEventListener('drop', e => {
+      e.preventDefault(); slot.classList.remove('drag');
+      const files = [...e.dataTransfer.files];
+      if (files.length >= 2) { loadFile('A', files[0]).then(() => loadFile('B', files[1])); }
+      else loadFile(k, files[0]);
+    });
+  });
+  // Dropping anywhere else on the page: fill A then B
+  document.addEventListener('dragover', e => e.preventDefault());
+  document.addEventListener('drop', e => {
+    if (e.target.closest('.slot')) return;
+    e.preventDefault();
+    const files = [...e.dataTransfer.files];
+    if (files.length >= 2) loadFile('A', files[0]).then(() => loadFile('B', files[1]));
+    else if (files[0]) loadFile(!tracks.A ? 'A' : 'B', files[0]);
+  });
+
+  // ---------- Transport ----------
+  const duration = () => Math.max(tracks.A?.buffer?.duration || 0, tracks.B?.buffer?.duration || 0);
+  const position = () => playing ? ctx.currentTime - startCtxTime : pauseOffset;
+
+  function stopSources() {
+    for (const s of sources) { s.onended = null; try { s.stop(); } catch {} s.disconnect(); }
+    sources = [];
+  }
+
+  async function play() {
+    if (!tracks.A && !tracks.B) return;
+    await decodeAll();
+    await ctx.resume();
+    if (pauseOffset >= duration()) pauseOffset = 0;
+    stopSources();
+    // Both sources are scheduled on the same clock instant: sample-accurate sync
+    const when = ctx.currentTime + 0.05;
+    for (const k of ['A', 'B']) {
+      const t = tracks[k];
+      if (!t || pauseOffset >= t.buffer.duration) continue;
+      const s = ctx.createBufferSource();
+      s.buffer = t.buffer;
+      s.connect(gains[k]);
+      s.start(when, pauseOffset);
+      sources.push(s);
+    }
+    startCtxTime = when - pauseOffset;
+    playing = true;
+    updateUI();
+    tick();
+  }
+
+  function pause() {
+    if (!playing) return;
+    pauseOffset = Math.min(position(), duration());
+    playing = false;
+    stopSources();
+    cancelAnimationFrame(raf);
+    updateUI();
+  }
+
+  function seekTo(sec) {
+    pauseOffset = Math.max(0, Math.min(sec, duration()));
+    if (playing) play(); else updateUI();
+  }
+
+  function setActive(k) {
+    if (!tracks[k]) return;
+    active = k;
+    if (ctx) {
+      // ~5 ms crossfade to avoid a click; afterwards the audible gain is exactly 1
+      const now = ctx.currentTime, ramp = 0.005;
+      for (const key of ['A', 'B']) {
+        const p = gains[key].gain;
+        p.cancelScheduledValues(now);
+        p.setValueAtTime(p.value, now);
+        p.linearRampToValueAtTime(key === k ? 1 : 0, now + ramp);
+      }
+    }
+    updateUI();
+  }
+
+  function tick() {
+    cancelAnimationFrame(raf);
+    const step = () => {
+      if (!playing) return;
+      const d = duration();
+      if (position() >= d) {
+        if (loopEl.checked) { pauseOffset = 0; play(); return; }
+        playing = false; pauseOffset = 0; stopSources(); updateUI(); return;
+      }
+      updateTime();
+      raf = requestAnimationFrame(step);
+    };
+    raf = requestAnimationFrame(step);
+  }
+
+  // ---------- UI ----------
+  function fmt(s) {
+    s = Math.max(0, s);
+    const m = Math.floor(s / 60), r = Math.floor(s % 60);
+    return `${m}:${String(r).padStart(2, '0')}`;
+  }
+  function updateTime() {
+    const d = duration(), p = Math.min(position(), d);
+    timeEl.textContent = `${fmt(p)} / ${fmt(d)}`;
+    if (!seeking) seek.value = d ? Math.round(p / d * 1000) : 0;
+  }
+  function updateUI() {
+    const any = !!(tracks.A || tracks.B);
+    playBtn.disabled = !any;
+    seek.disabled = !any;
+    playBtn.textContent = playing ? '❚❚' : '▶';
+    if (!tracks[active] && any) { active = tracks.A ? 'A' : 'B'; setActive(active); return; }
+    switchBtns.forEach(b => {
+      b.disabled = !tracks[b.dataset.k];
+      b.classList.toggle('on', b.dataset.k === active);
+    });
+    slots.forEach(s => s.classList.toggle('active', s.dataset.k === active && !!tracks[s.dataset.k]));
+    updateTime();
+  }
+
+  playBtn.addEventListener('click', () => playing ? pause() : play());
+  switchBtns.forEach(b => b.addEventListener('click', () => setActive(b.dataset.k)));
+  seek.addEventListener('input', () => {
+    seeking = true;
+    const d = duration();
+    timeEl.textContent = `${fmt(seek.value / 1000 * d)} / ${fmt(d)}`;
+  });
+  seek.addEventListener('change', () => { seeking = false; seekTo(seek.value / 1000 * duration()); });
+  slots.forEach(s => s.querySelector('.replace').addEventListener('click', e => {
+    e.stopPropagation(); s.querySelector('input').click();
+  }));
+
+  document.addEventListener('keydown', e => {
+    if (e.target.tagName === 'INPUT' && e.target.type !== 'range' && e.target.type !== 'checkbox') return;
+    const key = e.key.toLowerCase();
+    if (e.code === 'Space') { e.preventDefault(); playing ? pause() : play(); }
+    else if (key === 'tab' || key === 'arrowleft' || key === 'arrowright') {
+      e.preventDefault(); setActive(active === 'A' ? 'B' : 'A');
+    }
+    else if (key === 'a' || key === '1') setActive('A');
+    else if (key === 'b' || key === '2') setActive('B');
+  });
+
+  updateUI();
+})();
+</script>
+</body>
+</html>
