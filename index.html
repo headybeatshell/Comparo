@@ -3,19 +3,13 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Comparo — A/B audio</title>
+<title>Comparo</title>
 <style>
-  :root {
-    --bg: #111317;
-    --panel: #1b1e24;
-    --line: #2c3039;
-    --text: #e8eaee;
-    --muted: #8a909c;
-    --a: #4f9dff;
-    --b: #ff8a3d;
-  }
+  :root { --bg: #111317; --panel: #1b1e24; --line: #2c3039; --text: #e8eaee; --muted: #8a909c; --a: #4f9dff; --b: #ff8a3d; --warn: #ffcf5c; --on: #ffffff; color-scheme: dark; }
+  @media (prefers-color-scheme: light) { :root:not([data-theme="dark"]) { --bg: #f3f4f7; --panel: #ffffff; --line: #d6d9e0; --text: #15181d; --muted: #5d6470; --a: #1f6fe0; --b: #d9601a; --warn: #9a6a00; --on: #ffffff; color-scheme: light; } }
+  :root[data-theme="light"] { --bg: #f3f4f7; --panel: #ffffff; --line: #d6d9e0; --text: #15181d; --muted: #5d6470; --a: #1f6fe0; --b: #d9601a; --warn: #9a6a00; --on: #ffffff; color-scheme: light; }
   * { box-sizing: border-box; }
-  html, body { margin: 0; height: 100%; }
+  html, body { margin: 0; min-height: 100%; }
   body {
     background: var(--bg);
     color: var(--text);
@@ -23,7 +17,9 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: 16px;
+    padding-block: 16px;
+    padding-left: max(16px, env(safe-area-inset-left, 0px));
+    padding-right: max(16px, env(safe-area-inset-right, 0px));
   }
   main { width: 100%; max-width: 720px; }
   h1 { font-size: 18px; font-weight: 600; margin: 0 0 20px; letter-spacing: .02em; }
@@ -37,6 +33,7 @@
     border-radius: 12px;
     padding: 18px 16px;
     min-height: 120px;
+    min-width: 0;
     cursor: pointer;
     display: flex;
     flex-direction: column;
@@ -52,7 +49,10 @@
   .slot[data-k="A"] .letter { color: var(--a); }
   .slot[data-k="B"] .letter { color: var(--b); }
   .slot .name { font-weight: 600; word-break: break-all; }
-  .slot .meta { color: var(--muted); font-size: 13px; }
+  .slot .meta, .slot .loud { color: var(--muted); font-size: 13px; font-variant-numeric: tabular-nums; }
+  .slot .loud:empty { display: none; }
+  .slot .loud b { color: var(--text); font-weight: 600; }
+  .slot .loud .w { color: var(--warn); }
   .slot .replace {
     position: absolute; top: 10px; right: 10px;
     background: none; border: 1px solid var(--line); color: var(--muted);
@@ -62,7 +62,7 @@
   .slot:not(.loaded) .replace { display: none; }
   input[type=file] { display: none; }
 
-  .transport {
+  .panel {
     margin-top: 16px;
     background: var(--panel);
     border: 1px solid var(--line);
@@ -73,6 +73,7 @@
     gap: 14px;
   }
   .row { display: flex; align-items: center; gap: 12px; }
+  button.main:focus-visible, .switch button:focus-visible, .seg button:focus-visible { outline: 2px solid var(--muted); outline-offset: 2px; }
   button.main {
     width: 56px; height: 56px; border-radius: 50%;
     border: none; background: var(--text); color: var(--bg);
@@ -89,17 +90,32 @@
     font-size: 22px; font-weight: 700; cursor: pointer;
   }
   .switch button:disabled { cursor: default; opacity: .4; }
-  .switch button.on[data-k="A"] { background: var(--a); color: #fff; }
-  .switch button.on[data-k="B"] { background: var(--b); color: #fff; }
+  .switch button.on[data-k="A"] { background: var(--a); color: var(--on); }
+  .switch button.on[data-k="B"] { background: var(--b); color: var(--on); }
   .time { font-variant-numeric: tabular-nums; color: var(--muted); font-size: 13px; min-width: 92px; text-align: right; }
-  input[type=range] { flex: 1; accent-color: var(--text); }
+  input[type=range] { flex: 1; min-width: 0; accent-color: var(--text); }
   label.loop { color: var(--muted); font-size: 13px; display: flex; gap: 6px; align-items: center; cursor: pointer; }
+  .warn { color: var(--warn); font-size: 13px; min-height: 1em; }
+
+  .opt { display: flex; flex-direction: column; gap: 8px; }
+  .opt + .opt { border-top: 1px solid var(--line); padding-top: 14px; }
+  .opt-label { font-size: 12px; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); }
+  .seg { display: flex; flex-wrap: wrap; gap: 6px; }
+  .seg button {
+    border: 1px solid var(--line); background: transparent; color: var(--text);
+    border-radius: 8px; padding: 7px 12px; font: inherit; font-size: 14px; cursor: pointer;
+  }
+  .seg button:hover { border-color: var(--muted); }
+  .seg button.on { background: var(--text); color: var(--bg); border-color: var(--text); }
+  .note { color: var(--muted); font-size: 13px; font-variant-numeric: tabular-nums; }
+  .note:empty { display: none; }
+  .note b { color: var(--text); font-weight: 600; }
+
   .hint { color: var(--muted); font-size: 12px; text-align: center; margin-top: 14px; }
   kbd {
     border: 1px solid var(--line); border-bottom-width: 2px; border-radius: 4px;
     padding: 0 5px; font: 11px ui-monospace, monospace; color: var(--text);
   }
-  .warn { color: #ffcf5c; font-size: 13px; min-height: 1em; }
   @media (max-width: 520px) { .slots { grid-template-columns: 1fr; } }
 </style>
 </head>
@@ -112,19 +128,21 @@
       <div class="letter">A</div>
       <div class="name">Déposer un .wav ici</div>
       <div class="meta">ou cliquer pour choisir</div>
+      <div class="loud"></div>
       <button class="replace" type="button">Changer</button>
-      <input type="file" accept=".wav,audio/wav,audio/x-wav,audio/wave">
+      <input type="file" id="fileA" accept=".wav,audio/wav,audio/x-wav,audio/wave">
     </div>
     <div class="slot" data-k="B">
       <div class="letter">B</div>
       <div class="name">Déposer un .wav ici</div>
       <div class="meta">ou cliquer pour choisir</div>
+      <div class="loud"></div>
       <button class="replace" type="button">Changer</button>
-      <input type="file" accept=".wav,audio/wav,audio/x-wav,audio/wave">
+      <input type="file" id="fileB" accept=".wav,audio/wav,audio/x-wav,audio/wave">
     </div>
   </div>
 
-  <div class="transport">
+  <div class="panel">
     <div class="row">
       <button class="main" id="play" disabled title="Lecture / Pause (Espace)">▶</button>
       <div class="switch">
@@ -142,24 +160,127 @@
     </div>
   </div>
 
+  <div class="panel">
+    <div class="opt">
+      <div class="opt-label">Écouter sur</div>
+      <div class="seg" id="sim">
+        <button data-v="off" class="on">Studio (original)</button>
+        <button data-v="phone">Haut-parleur de téléphone</button>
+        <button data-v="earbuds">Écouteurs bas de gamme</button>
+        <button data-v="car">Voiture</button>
+        <button data-v="bt">Enceinte Bluetooth</button>
+      </div>
+      <div class="note" id="simNote"></div>
+    </div>
+    <div class="opt">
+      <div class="opt-label">Normalisation streaming</div>
+      <div class="seg" id="norm">
+        <button data-v="off" class="on">Aucune</button>
+        <button data-v="spotify">Spotify</button>
+        <button data-v="apple">Apple Music</button>
+        <button data-v="youtube">YouTube</button>
+      </div>
+      <div class="note" id="normNote"></div>
+    </div>
+  </div>
+
   <div class="hint">
     <kbd>Espace</kbd> lecture/pause · <kbd>Tab</kbd> ou <kbd>←</kbd><kbd>→</kbd> basculer A/B · <kbd>A</kbd> / <kbd>B</kbd> choisir directement
   </div>
 </main>
 
+<!-- Loudness meter (ITU-R BS.1770-4 integrated loudness + 4x oversampled true peak), run in a worker -->
+<script type="text/plain" id="meter-src">
+function kCoefs(fs) {
+  let f0 = 1681.974450955533, G = 3.999843853973347, Q = 0.7071752369554196;
+  let K = Math.tan(Math.PI * f0 / fs), Vh = Math.pow(10, G / 20), Vb = Math.pow(Vh, 0.4996667741545416);
+  let a0 = 1 + K / Q + K * K;
+  const s1 = { b0: (Vh + Vb * K / Q + K * K) / a0, b1: 2 * (K * K - Vh) / a0, b2: (Vh - Vb * K / Q + K * K) / a0,
+               a1: 2 * (K * K - 1) / a0, a2: (1 - K / Q + K * K) / a0 };
+  f0 = 38.13547087602444; Q = 0.5003270373238773; K = Math.tan(Math.PI * f0 / fs);
+  a0 = 1 + K / Q + K * K;
+  const s2 = { b0: 1, b1: -2, b2: 1, a1: 2 * (K * K - 1) / a0, a2: (1 - K / Q + K * K) / a0 };
+  return [s1, s2];
+}
+// 4x oversampling: windowed-sinc interpolation of the 3 in-between points
+const P = 4, H = 8, TAPS = 2 * H;
+const phases = [];
+for (let p = 1; p < P; p++) {
+  const c = new Float64Array(TAPS);
+  for (let j = 0; j < TAPS; j++) {
+    const k = j - H + 1, d = p / P - k;
+    const sinc = Math.sin(Math.PI * d) / (Math.PI * d);
+    const w = 0.5 * (1 + Math.cos(Math.PI * d / (H + 0.5)));
+    c[j] = sinc * w;
+  }
+  phases.push(c);
+}
+onmessage = e => {
+  const { chs, sr } = e.data;
+  const [s1, s2] = kCoefs(sr);
+  const seg = Math.round(sr * 0.1);
+  const n = chs[0].length;
+  const nseg = Math.floor(n / seg);
+  const segE = new Float64Array(nseg);
+  let peak = 0;
+  for (let c = 0; c < chs.length; c++) {
+    const x = chs[c];
+    const wgt = chs.length >= 5 && (c === 4 || c === 5) ? 1.41 : (chs.length >= 6 && c === 3 ? 0 : 1);
+    let x1 = 0, x2 = 0, y1 = 0, y2 = 0, z1 = 0, z2 = 0;
+    for (let i = 0; i < n; i++) {
+      const v = x[i];
+      const a = Math.abs(v); if (a > peak) peak = a;
+      const y = s1.b0 * v + s1.b1 * x1 + s1.b2 * x2 - s1.a1 * y1 - s1.a2 * y2;
+      x2 = x1; x1 = v;
+      const z = y - 2 * y1 + y2 - s2.a1 * z1 - s2.a2 * z2;
+      y2 = y1; y1 = y;
+      z2 = z1; z1 = z;
+      const si = (i / seg) | 0;
+      if (si < nseg) segE[si] += wgt * z * z;
+    }
+    for (let i = H - 1; i < n - H; i++) {
+      for (let p = 0; p < P - 1; p++) {
+        const cf = phases[p];
+        let s = 0;
+        for (let j = 0; j < TAPS; j++) s += x[i - H + 1 + j] * cf[j];
+        if (s < 0) s = -s;
+        if (s > peak) peak = s;
+      }
+    }
+  }
+  const blocks = [];
+  for (let j = 0; j + 3 < nseg; j++) blocks.push((segE[j] + segE[j + 1] + segE[j + 2] + segE[j + 3]) / (4 * seg));
+  const L = z => -0.691 + 10 * Math.log10(z);
+  const mean = a => a.reduce((s, v) => s + v, 0) / a.length;
+  let lufs = -Infinity;
+  const abs = blocks.filter(z => L(z) > -70);
+  if (abs.length) {
+    const rel = L(mean(abs)) - 10;
+    const g = abs.filter(z => L(z) > rel);
+    if (g.length) lufs = L(mean(g));
+  }
+  postMessage({ lufs, tp: peak > 0 ? 20 * Math.log10(peak) : -Infinity });
+};
+</script>
+
 <script>
 (() => {
   // ---------- State ----------
-  const tracks = { A: null, B: null };   // { name, bytes, info, buffer }
+  const tracks = { A: null, B: null };   // { name, bytes, info, buffer, meter }
   let ctx = null;
-  let gains = {};
+  let sw = {};        // A/B switch gains
+  let normG = {};     // per-track normalization gains
+  let sum = null;     // mix bus feeding the playback simulator
+  let chain = [];     // simulator nodes
   let sources = [];
   let active = 'A';
   let playing = false;
-  let startCtxTime = 0;   // ctx time corresponding to offset 0
-  let pauseOffset = 0;    // seconds
+  let startCtxTime = 0;
+  let pauseOffset = 0;
   let raf = 0;
   let seeking = false;
+  let simMode = 'off';
+  let normMode = 'off';
 
   const $ = s => document.querySelector(s);
   const playBtn = $('#play');
@@ -169,6 +290,54 @@
   const loopEl = $('#loop');
   const switchBtns = [...document.querySelectorAll('.switch button')];
   const slots = [...document.querySelectorAll('.slot')];
+  const slotOf = k => slots.find(s => s.dataset.k === k);
+
+  // ---------- Presets ----------
+  // filters: [type, frequency, Q, gain dB]
+  const SIM = {
+    phone: {
+      note: 'Mono, presque plus de basses sous 500 Hz, médiums durs, aigus coupés, petite pièce.',
+      trim: -3, mono: true, comp: true,
+      filters: [['highpass', 480, 0.9], ['highpass', 480, 0.7], ['peaking', 1000, 1.0, -2], ['peaking', 2600, 1.2, 6], ['lowpass', 9000, 0.7]],
+      reverb: { len: 0.35, wet: 0.12 },
+    },
+    earbuds: {
+      note: 'Stéréo, basses maigres, pic agressif vers 4–5 kHz, extrême aigu atténué.',
+      trim: -5, mono: false, comp: false,
+      filters: [['highpass', 90, 0.7], ['lowshelf', 220, 0, -4], ['peaking', 4500, 2.0, 6], ['lowpass', 13000, 0.7]],
+      reverb: null,
+    },
+    car: {
+      note: 'Basses gonflées par l’habitacle, bas-médiums qui traînent, aigus ternes, réflexions très courtes.',
+      trim: -7, mono: false, comp: false,
+      filters: [['highpass', 35, 0.7], ['lowshelf', 120, 0, 6], ['peaking', 320, 1.4, 3], ['peaking', 3000, 1.0, -3], ['lowpass', 11000, 0.7]],
+      reverb: { len: 0.12, wet: 0.14 },
+    },
+    bt: {
+      note: 'Mono, bosse de basse vers 130 Hz puis rien en dessous, limiteur intégré, pièce de taille moyenne.',
+      trim: -5, mono: true, comp: true,
+      filters: [['highpass', 75, 1.0], ['peaking', 130, 1.5, 5], ['peaking', 2500, 1.0, -2], ['lowpass', 15000, 0.7]],
+      reverb: { len: 0.6, wet: 0.18 },
+    },
+  };
+
+  const NORM = {
+    spotify: { label: 'Spotify', target: -14, boost: true,
+      note: 'Spotify (réglage « Normal ») : −14 LUFS. Les morceaux trop forts sont baissés, les plus calmes sont montés sans dépasser −1 dBTP.' },
+    apple: { label: 'Apple Music', target: -16, boost: true,
+      note: 'Apple Music (Sound Check) : −16 LUFS. Les morceaux trop forts sont baissés, les plus calmes sont montés dans la limite de leur marge de crête.' },
+    youtube: { label: 'YouTube', target: -14, boost: false,
+      note: 'YouTube : −14 LUFS. Les morceaux trop forts sont baissés, les plus calmes ne sont jamais montés.' },
+  };
+
+  function normGainDb(k) {
+    const m = tracks[k]?.meter;
+    const p = NORM[normMode];
+    if (!p || !m || !isFinite(m.lufs)) return 0;
+    let g = p.target - m.lufs;
+    if (g > 0) g = p.boost ? Math.min(g, Math.max(0, -1 - m.tp)) : 0;
+    return g;
+  }
 
   // ---------- WAV header parsing (to keep the native sample rate) ----------
   function parseWav(buf) {
@@ -191,9 +360,10 @@
     return null;
   }
 
-  // ---------- Audio context ----------
-  // The context runs at the files' native sample rate so the browser never resamples them.
-  // Gain on the audible track is exactly 1.0: samples reach the output untouched.
+  // ---------- Audio graph ----------
+  // source → normG[k] → sw[k] → sum → (simulator) → destination
+  // With both options off, every gain on the audible path is exactly 1.0 and the simulator is bypassed:
+  // samples reach the output untouched, at the files' native sample rate.
   function targetRate() {
     const t = tracks.A || tracks.B;
     return t && t.info ? t.info.sampleRate : undefined;
@@ -205,15 +375,96 @@
     if (ctx) { stopSources(); await ctx.close(); }
     try { ctx = new AudioContext({ sampleRate: rate, latencyHint: 'playback' }); }
     catch { ctx = new AudioContext({ latencyHint: 'playback' }); }
-    gains = {};
+    sum = ctx.createGain();
+    sw = {}; normG = {}; chain = [];
     for (const k of ['A', 'B']) {
-      const g = ctx.createGain();
-      g.gain.value = k === active ? 1 : 0;
-      g.connect(ctx.destination);
-      gains[k] = g;
+      sw[k] = ctx.createGain();
+      sw[k].gain.value = k === active ? 1 : 0;
+      sw[k].connect(sum);
+      normG[k] = ctx.createGain();
+      normG[k].gain.value = Math.pow(10, normGainDb(k) / 20);
+      normG[k].connect(sw[k]);
     }
-    // Decoded buffers belong to the old rate: redo them
+    buildChain();
     for (const k of ['A', 'B']) if (tracks[k]) tracks[k].buffer = null;
+  }
+
+  function makeIR(len) {
+    const n = Math.max(1, Math.round(ctx.sampleRate * len));
+    const ir = ctx.createBuffer(2, n, ctx.sampleRate);
+    for (let c = 0; c < 2; c++) {
+      const d = ir.getChannelData(c);
+      for (let i = 0; i < n; i++) d[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / n, 4);
+    }
+    return ir;
+  }
+
+  function buildChain() {
+    sum.disconnect();
+    chain.forEach(n => n.disconnect());
+    chain = [];
+    const p = SIM[simMode];
+    if (!p) { sum.connect(ctx.destination); return; }
+    const add = n => { chain.push(n); return n; };
+    let node = add(ctx.createGain());
+    node.gain.value = Math.pow(10, p.trim / 20);
+    sum.connect(node);
+    if (p.mono) {
+      const m = add(ctx.createGain());
+      m.channelCount = 1; m.channelCountMode = 'explicit'; m.channelInterpretation = 'speakers';
+      node.connect(m); node = m;
+    }
+    for (const [type, f, q, g] of p.filters) {
+      const b = add(ctx.createBiquadFilter());
+      b.type = type; b.frequency.value = f; if (q) b.Q.value = q; if (g) b.gain.value = g;
+      node.connect(b); node = b;
+    }
+    if (p.comp) {
+      const c = add(ctx.createDynamicsCompressor());
+      c.threshold.value = -20; c.knee.value = 6; c.ratio.value = 4; c.attack.value = 0.005; c.release.value = 0.15;
+      node.connect(c); node = c;
+    }
+    const out = add(ctx.createGain());
+    node.connect(out);
+    if (p.reverb) {
+      const conv = add(ctx.createConvolver());
+      conv.buffer = makeIR(p.reverb.len);
+      const wet = add(ctx.createGain());
+      wet.gain.value = p.reverb.wet;
+      node.connect(conv); conv.connect(wet); wet.connect(out);
+    }
+    out.connect(ctx.destination);
+  }
+
+  function setSim(v) {
+    simMode = v;
+    if (ctx) {
+      // short fade around the rewiring to avoid clicks
+      const now = ctx.currentTime, g = sum.gain;
+      g.cancelScheduledValues(now); g.setValueAtTime(g.value, now); g.linearRampToValueAtTime(0, now + 0.015);
+      setTimeout(() => {
+        buildChain();
+        const t = ctx.currentTime;
+        g.cancelScheduledValues(t); g.setValueAtTime(0, t); g.linearRampToValueAtTime(1, t + 0.015);
+      }, 25);
+    }
+    updateOptions();
+  }
+
+  function applyNorm() {
+    if (!ctx) return;
+    const now = ctx.currentTime;
+    for (const k of ['A', 'B']) {
+      const g = normG[k].gain;
+      g.cancelScheduledValues(now); g.setValueAtTime(g.value, now);
+      g.linearRampToValueAtTime(Math.pow(10, normGainDb(k) / 20), now + 0.03);
+    }
+  }
+
+  function setNorm(v) {
+    normMode = v;
+    applyNorm();
+    updateOptions();
   }
 
   async function decodeAll() {
@@ -224,20 +475,35 @@
     }
   }
 
+  // ---------- Loudness measurement ----------
+  const meterURL = URL.createObjectURL(new Blob([$('#meter-src').textContent], { type: 'text/javascript' }));
+  function measure(buffer) {
+    return new Promise((resolve, reject) => {
+      const w = new Worker(meterURL);
+      const chs = [];
+      for (let c = 0; c < buffer.numberOfChannels; c++) chs.push(buffer.getChannelData(c).slice());
+      w.onmessage = e => { resolve(e.data); w.terminate(); };
+      w.onerror = e => { reject(e); w.terminate(); };
+      w.postMessage({ chs, sr: buffer.sampleRate }, chs.map(c => c.buffer));
+    });
+  }
+
   // ---------- Loading ----------
   async function loadFile(k, file) {
     if (!file) return;
     const wasPlaying = playing;
     if (playing) pause();
-    const slot = slots.find(s => s.dataset.k === k);
+    const slot = slotOf(k);
     slot.querySelector('.name').textContent = file.name;
     slot.querySelector('.meta').textContent = 'Chargement…';
+    slot.querySelector('.loud').textContent = '';
+    let t;
     try {
       const bytes = await file.arrayBuffer();
       const info = parseWav(bytes);
-      tracks[k] = { name: file.name, bytes, info, buffer: null };
+      t = tracks[k] = { name: file.name, bytes, info, buffer: null, meter: null };
       await decodeAll();
-      const b = tracks[k].buffer;
+      const b = t.buffer;
       const parts = [];
       if (info) {
         parts.push((info.sampleRate / 1000).toLocaleString('fr-FR') + ' kHz');
@@ -253,10 +519,17 @@
       slot.classList.remove('loaded');
       slot.querySelector('.meta').textContent = 'Fichier illisible';
       console.error(e);
+      t = null;
     }
     updateWarn();
     updateUI();
+    updateOptions();
     if (wasPlaying) play();
+    if (t) {
+      slot.querySelector('.loud').textContent = 'Mesure du volume…';
+      try { t.meter = await measure(t.buffer); } catch (e) { console.error(e); }
+      if (tracks[k] === t) { applyNorm(); updateOptions(); }
+    }
   }
 
   function updateWarn() {
@@ -283,7 +556,6 @@
       else loadFile(k, files[0]);
     });
   });
-  // Dropping anywhere else on the page: fill A then B
   document.addEventListener('dragover', e => e.preventDefault());
   document.addEventListener('drop', e => {
     if (e.target.closest('.slot')) return;
@@ -315,7 +587,7 @@
       if (!t || pauseOffset >= t.buffer.duration) continue;
       const s = ctx.createBufferSource();
       s.buffer = t.buffer;
-      s.connect(gains[k]);
+      s.connect(normG[k]);
       s.start(when, pauseOffset);
       sources.push(s);
     }
@@ -346,7 +618,7 @@
       // ~5 ms crossfade to avoid a click; afterwards the audible gain is exactly 1
       const now = ctx.currentTime, ramp = 0.005;
       for (const key of ['A', 'B']) {
-        const p = gains[key].gain;
+        const p = sw[key].gain;
         p.cancelScheduledValues(now);
         p.setValueAtTime(p.value, now);
         p.linearRampToValueAtTime(key === k ? 1 : 0, now + ramp);
@@ -376,6 +648,12 @@
     const m = Math.floor(s / 60), r = Math.floor(s % 60);
     return `${m}:${String(r).padStart(2, '0')}`;
   }
+  const num = (v, signed) => {
+    if (!isFinite(v)) return '−∞';
+    const s = Math.abs(v).toLocaleString('fr-FR', { minimumFractionDigits: 1, maximumFractionDigits: 1 });
+    return (v < 0 && s !== '0,0' ? '−' : signed && v > 0 ? '+' : '') + s;
+  };
+
   function updateTime() {
     const d = duration(), p = Math.min(position(), d);
     timeEl.textContent = `${fmt(p)} / ${fmt(d)}`;
@@ -395,8 +673,41 @@
     updateTime();
   }
 
+  function updateOptions() {
+    document.querySelectorAll('#sim button').forEach(b => b.classList.toggle('on', b.dataset.v === simMode));
+    document.querySelectorAll('#norm button').forEach(b => b.classList.toggle('on', b.dataset.v === normMode));
+    $('#simNote').textContent = SIM[simMode]?.note || '';
+
+    const p = NORM[normMode];
+    for (const k of ['A', 'B']) {
+      const t = tracks[k], el = slotOf(k).querySelector('.loud');
+      if (!t) { el.textContent = ''; continue; }
+      if (!t.meter) continue;   // keeps "Mesure du volume…"
+      const { lufs, tp } = t.meter;
+      let html = `<b>${num(lufs)} LUFS</b> · <span class="${tp > -1 ? 'w' : ''}" title="${tp > -1 ? 'Crête au-dessus de −1 dBTP : risque de saturation après encodage' : ''}">${num(tp)} dBTP</span>`;
+      if (p) html += ` · ${p.label} : <b>${num(normGainDb(k), true)} dB</b>`;
+      el.innerHTML = html;
+    }
+
+    const note = $('#normNote');
+    const ma = tracks.A?.meter, mb = tracks.B?.meter;
+    let txt = p ? p.note : '';
+    if (ma && mb && isFinite(ma.lufs) && isFinite(mb.lufs)) {
+      const la = ma.lufs + normGainDb('A'), lb = mb.lufs + normGainDb('B');
+      const d = la - lb;
+      const who = Math.abs(d) < 0.05 ? 'A et B sont au même niveau'
+        : `<b>${d > 0 ? 'A' : 'B'}</b> est ${num(Math.abs(d))} dB plus fort`;
+      txt += (txt ? '<br>' : '') + (p
+        ? `Après normalisation : A ${num(la)} LUFS, B ${num(lb)} LUFS. ${who}.`
+        : `Sans normalisation : ${who}.`);
+    }
+    note.innerHTML = txt;
+  }
+
   playBtn.addEventListener('click', () => playing ? pause() : play());
   switchBtns.forEach(b => b.addEventListener('click', () => setActive(b.dataset.k)));
+  document.querySelectorAll('#sim button').forEach(b => b.addEventListener('click', () => setSim(b.dataset.v)));
+  document.querySelectorAll('#norm button').forEach(b => b.addEventListener('click', () => setNorm(b.dataset.v)));
   seek.addEventListener('input', () => {
     seeking = true;
     const d = duration();
@@ -419,6 +730,7 @@
   });
 
   updateUI();
+  updateOptions();
 })();
 </script>
 </body>
