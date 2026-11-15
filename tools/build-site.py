@@ -18,7 +18,7 @@ html, n = re.subn(
     r'<link rel="preconnect" href="https://fonts\.googleapis\.com">\n'
     r'<link rel="preconnect" href="https://fonts\.gstatic\.com" crossorigin>\n'
     r'<link rel="stylesheet" href="https://fonts\.googleapis\.com/css2[^"]*">\n',
-    '<meta name="description" content="Comparaison A/B de fichiers audio, suivi des projets et détecteur de masquage. Tout se passe dans le navigateur.">\n'
+    '<meta name="description" content="Audio Companion : comparaison A/B de fichiers audio, suivi des projets et détecteur de masquage. Tout se passe dans le navigateur.">\n'
     '<meta name="theme-color" content="#000000">\n'
     '<link rel="icon" href="favicon.svg" type="image/svg+xml">\n'
     '<link rel="manifest" href="manifest.webmanifest">\n'
@@ -41,6 +41,6 @@ html = html.replace('</body>', sw_register)
 build = hashlib.sha256(html.encode('utf-8')).hexdigest()[:10]
 sw_path = root / 'site' / 'sw.js'
 sw = sw_path.read_text(encoding='utf-8')
-sw = re.sub(r"const CACHE = 'comparo-[^']*';", f"const CACHE = 'comparo-{build}';", sw)
+sw = re.sub(r"const CACHE = '[a-z-]*-[0-9a-f]+';|const CACHE = '[a-z-]*__BUILD__';", f"const CACHE = 'audio-companion-{build}';", sw)
 sw_path.write_text(sw, encoding='utf-8')
 print(f'site/index.html written (build {build})')

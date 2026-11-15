@@ -1,6 +1,6 @@
-// Offline support: the page and its fonts are cached so Comparo opens without a connection.
+// Offline support: the page and its fonts are cached so Audio Companion opens without a connection.
 // The page itself is fetched network-first, so a new upload on the server is picked up on the next visit.
-const CACHE = 'comparo-4d9b6f49c4';
+const CACHE = 'audio-companion-dec93f85e1';
 const SHELL = [
   './',
   'favicon.svg',
@@ -22,7 +22,7 @@ self.addEventListener('install', e => {
 self.addEventListener('activate', e => {
   e.waitUntil(
     caches.keys()
-      .then(keys => Promise.all(keys.filter(k => k.startsWith('comparo-') && k !== CACHE).map(k => caches.delete(k))))
+      .then(keys => Promise.all(keys.filter(k => (k.startsWith('comparo-') || k.startsWith('audio-companion-')) && k !== CACHE).map(k => caches.delete(k))))
       .then(() => self.clients.claim())
   );
 });

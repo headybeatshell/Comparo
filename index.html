@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Comparo Studio</title>
+<title>Audio Companion</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@300;400;500&family=Inter:wght@300;400;500&family=IBM+Plex+Mono:wght@400&display=swap">
@@ -35,6 +35,7 @@
   .mono { font-family: var(--mono); font-weight: 400; font-size: 13px; text-transform: uppercase; letter-spacing: .18em; }
 
   /* Masthead */
+  .brand { text-align: center; color: var(--muted); margin-bottom: -30px; }
   .top { display: flex; justify-content: center; align-items: center; gap: 12px; }
   .logo { width: 30px; height: 30px; background: var(--ink); display: grid; place-items: center; }
   .logo::before { content: ""; width: 18px; height: 18px; border-radius: 50%; background: var(--bg); }
@@ -310,6 +311,7 @@
 </head>
 <body>
 <main>
+  <div class="brand mono">Audio Companion</div>
   <header class="top"><div class="logo" id="appLogo" aria-hidden="true"></div><span id="appName">COMPARO</span></header>
   <nav class="apps" aria-label="Changer d’outil"><button type="button" data-app="comparo" class="on">Comparo</button><button type="button" data-app="notes">Notes</button><button type="button" data-app="ghost">Ghost</button></nav>
 
@@ -1998,10 +2000,10 @@ onmessage = e => {
 
   // Backup (browser storage only): export to a JSON file, import and merge by project id
   $('exportBtn').addEventListener('click', () => {
-    const blob = new Blob([JSON.stringify({ app: 'comparo-notes', version: 1, exportedAt: new Date().toISOString(), projects }, null, 2)], { type: 'application/json' });
+    const blob = new Blob([JSON.stringify({ app: 'audio-companion-notes', version: 1, exportedAt: new Date().toISOString(), projects }, null, 2)], { type: 'application/json' });
     const a = document.createElement('a');
     a.href = URL.createObjectURL(blob);
-    a.download = `comparo-notes-${new Date().toISOString().slice(0, 10)}.json`;
+    a.download = `audio-companion-notes-${new Date().toISOString().slice(0, 10)}.json`;
     document.body.append(a); a.click(); a.remove();
     setTimeout(() => URL.revokeObjectURL(a.href), 1000);
   });

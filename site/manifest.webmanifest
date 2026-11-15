@@ -1,7 +1,7 @@
 {
-  "name": "Comparo Studio",
-  "short_name": "Comparo",
-  "description": "Comparaison A/B de fichiers audio, suivi des projets et détecteur de masquage.",
+  "name": "Audio Companion",
+  "short_name": "Audio Companion",
+  "description": "Comparo, Notes et Ghost : comparaison A/B de fichiers audio, suivi des projets et détecteur de masquage.",
   "lang": "fr",
   "start_url": "./",
   "scope": "./",

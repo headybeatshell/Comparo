@@ -1,6 +1,12 @@
-# Comparo
+# Audio Companion
 
-Outil de comparaison A/B entre deux fichiers audio `.wav`, dans le navigateur.
+Trois outils audio dans le navigateur, sans rien installer :
+
+- **Comparo** : comparaison A/B synchronisée de deux fichiers `.wav`, avec simulateur d'écoute et aperçu de normalisation streaming.
+- **Notes** : suivi des projets inachevés, versions de bounce et notes horodatées sur la timeline.
+- **Ghost** : détecteur de masquage entre deux stems.
+
+## Comparo
 
 ## Utilisation
 

@@ -1,10 +1,10 @@
-# Comparo Studio : mise en ligne
+# Audio Companion : mise en ligne
 
 Ce dossier est un site statique complet : il n'y a ni base de données, ni PHP, ni Node.js à installer. Tout se passe dans le navigateur de l'utilisateur.
 
 ## Mettre en ligne
 
-1. Copiez **tout le contenu** de ce dossier (y compris `fonts/` et le fichier caché `.htaccess`) à la racine de votre site, ou dans un sous-dossier, par exemple `https://votre-site.fr/comparo/`.
+1. Copiez **tout le contenu** de ce dossier (y compris `fonts/` et le fichier caché `.htaccess`) à la racine de votre site, ou dans un sous-dossier, par exemple `https://votre-site.fr/audio-companion/`.
    - Hébergement mutualisé (OVH, o2switch, Ionos…) : par FTP/SFTP avec FileZilla, dans `www/` ou `public_html/`.
    - Netlify, Vercel, Cloudflare Pages, GitHub Pages : déposez le dossier tel quel, sans étape de build.
 2. Ouvrez l'adresse dans le navigateur. C'est tout.
@@ -18,7 +18,7 @@ Ce dossier est un site statique complet : il n'y a ni base de données, ni PHP, 
 | `index.html` | L'application complète (Comparo, Notes, Ghost) |
 | `fonts/` | Polices hébergées localement (licence SIL OFL), aucun appel à Google |
 | `favicon.svg` | Icône de l'onglet et de l'application installée |
-| `manifest.webmanifest` | Permet d'installer Comparo comme une application |
+| `manifest.webmanifest` | Permet d'installer Audio Companion comme une application |
 | `sw.js` | Mode hors ligne : l'outil s'ouvre même sans connexion après une première visite |
 | `.htaccess` | Réglages Apache (types de fichiers, cache). Ignoré par les autres serveurs |
 
