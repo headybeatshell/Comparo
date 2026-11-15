@@ -69,6 +69,12 @@ Troisième outil, accessible par le sélecteur **Comparo / Notes / Ghost**, ou d
 
 L'analyse se fait en tranches de 1/6 d'octave : deux stems sont en conflit dans une tranche quand ils y sont tous deux présents au même moment, avec des niveaux proches (moins de 12 dB d'écart).
 
+## Mise en ligne sur votre serveur
+
+Le dossier [`site/`](site/) est une version prête à déposer sur n'importe quel hébergement web statique (FTP, Netlify, GitHub Pages…) : polices hébergées localement, mode hors ligne et installation comme application. Le mode d'emploi est dans [`site/LISEZMOI.md`](site/LISEZMOI.md).
+
+Après une modification de `index.html`, régénérez-le avec `python3 tools/build-site.py`.
+
 ## Qualité audio
 
 - Le contexte audio tourne à la fréquence d'échantillonnage native du fichier (lue dans l'en-tête WAV), ce qui évite tout rééchantillonnage par le navigateur.

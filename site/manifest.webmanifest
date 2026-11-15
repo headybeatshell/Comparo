@@ -1,0 +1,14 @@
+{
+  "name": "Comparo Studio",
+  "short_name": "Comparo",
+  "description": "Comparaison A/B de fichiers audio, suivi des projets et détecteur de masquage.",
+  "lang": "fr",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#000000",
+  "theme_color": "#000000",
+  "icons": [
+    { "src": "favicon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" }
+  ]
+}
