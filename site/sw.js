@@ -1,6 +1,6 @@
 // Offline support: the page and its fonts are cached so Comparo opens without a connection.
 // The page itself is fetched network-first, so a new upload on the server is picked up on the next visit.
-const CACHE = 'comparo-7a748a99b6';
+const CACHE = 'comparo-4d9b6f49c4';
 const SHELL = [
   './',
   'favicon.svg',

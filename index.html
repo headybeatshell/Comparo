@@ -1626,7 +1626,7 @@ onmessage = e => {
     }
     if (!db || !id) {
       projects = readLocal(); mode = 'local'; ready = true;
-      $('backupRow').hidden = false;
+      $('backupRow').hidden = !!(window.claude && window.claude.use); // file downloads only work outside claude.ai
       $('storeInfo').textContent = 'Projets enregistrés dans ce navigateur. Les fichiers audio restent sur votre appareil.';
       render(); return;
     }
