@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Comparo Notes</title>
+<title>Comparo Studio</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@300;400;500&family=Inter:wght@300;400;500&family=IBM+Plex+Mono:wght@400&display=swap">
@@ -262,6 +262,40 @@
   .storemsg { color: var(--warn); }
   .storemsg:empty { display: none; }
   .dropping .tl, .dropping #bounceList { outline: 1.5px dashed var(--mint); outline-offset: 6px; border-radius: 12px; }
+  /* Ghost (masking detector) */
+  .logo.ghost::before {
+    width: 22px; height: 14px; border-radius: 0;
+    background:
+      radial-gradient(circle at 7px 7px, transparent 4px, var(--bg) 4.5px 6.5px, transparent 7px),
+      radial-gradient(circle at 15px 7px, transparent 4px, var(--bg) 4.5px 6.5px, transparent 7px);
+  }
+  #gSlots .slot { min-height: 0; }
+  .gtrans { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
+  .gtrans .filters { margin: 0; }
+  .gtrans .grow { flex: 1; display: flex; justify-content: flex-end; }
+  .zonechip { display: inline-flex; align-items: center; gap: 8px; }
+  .chart { position: relative; width: 100%; }
+  .chart canvas { display: block; width: 100%; height: 100%; }
+  .chart.spec { height: 240px; }
+  .chart.heat { height: 220px; cursor: pointer; }
+  .chart .ph { position: absolute; top: 0; bottom: 22px; width: 1.5px; background: var(--white); pointer-events: none; }
+  .legend { display: flex; gap: 18px; flex-wrap: wrap; color: var(--muted); }
+  .legend span { display: inline-flex; align-items: center; gap: 8px; }
+  .legend i { width: 14px; height: 3px; border-radius: 2px; display: inline-block; }
+  .legend i.a { background: var(--ink); }
+  .legend i.b { background: var(--mint); }
+  .legend i.c { background: var(--coral); height: 10px; width: 10px; border-radius: 2px; opacity: .8; }
+  .cardhead { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; flex-wrap: wrap; }
+  .cardhead h3 { margin: 0; font-family: var(--display); font-weight: 400; font-size: 26px; letter-spacing: -0.02em; }
+  .zone { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 6px 16px; align-items: center; border-bottom: 1px solid var(--line); padding: 18px 0; }
+  .zone .t { font-family: var(--display); font-weight: 300; font-size: 24px; letter-spacing: -0.02em; line-height: 1.15; }
+  .zone .t b { font-weight: 400; }
+  .zone .s { font-family: var(--mono); font-size: 11.5px; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); }
+  .zone .adv { grid-column: 1 / -1; color: var(--muted); font-size: 15px; max-width: 62ch; }
+  .zone .meter { grid-column: 1 / -1; height: 4px; background: var(--line); border-radius: 2px; overflow: hidden; }
+  .zone .meter i { display: block; height: 100%; background: var(--coral); }
+  .zone.on .t { color: var(--mint); }
+  .zone .pill.on { background: var(--white); border-color: var(--white); color: var(--black); }
   @media (max-width: 560px) {
     .slots { grid-template-columns: 1fr; }
     .slot { min-height: 0; }
@@ -277,7 +311,7 @@
 <body>
 <main>
   <header class="top"><div class="logo" id="appLogo" aria-hidden="true"></div><span id="appName">COMPARO</span></header>
-  <nav class="apps" aria-label="Changer d’outil"><button type="button" data-app="comparo" class="on">Comparo</button><button type="button" data-app="notes">Notes</button></nav>
+  <nav class="apps" aria-label="Changer d’outil"><button type="button" data-app="comparo" class="on">Comparo</button><button type="button" data-app="notes">Notes</button><button type="button" data-app="ghost">Ghost</button></nav>
 
   <div class="view" id="view-comparo">
 
@@ -428,6 +462,72 @@
       <div class="storemsg" id="storeMsg"></div>
     </footer>
   </div>
+  <div class="view" id="view-ghost" hidden>
+    <div class="banner mono"><span id="gBanner">Chargez deux stems · A et B</span><span aria-hidden="true">↓</span></div>
+
+    <h1 class="hero">Là où vos sons se marchent dessus</h1>
+
+    <section class="slots" id="gSlots">
+      <div class="slot" data-k="A">
+        <div class="tag mono">Stem A</div>
+        <div class="body">
+          <div class="name">Déposer un stem ici</div>
+          <div class="meta">ex : kick, voix</div>
+        </div>
+        <button class="replace" type="button">Changer</button>
+        <input type="file" id="gFileA" accept="audio/*,.wav,.aif,.aiff,.mp3,.flac">
+      </div>
+      <div class="slot" data-k="B">
+        <div class="tag mono">Stem B</div>
+        <div class="body">
+          <div class="name">Déposer un stem ici</div>
+          <div class="meta">ex : basse, guitare</div>
+        </div>
+        <button class="replace" type="button">Changer</button>
+        <input type="file" id="gFileB" accept="audio/*,.wav,.aif,.aiff,.mp3,.flac">
+      </div>
+    </section>
+
+    <section class="tl" id="gPlayer">
+      <div class="gtrans">
+        <button class="mini-play" id="gPlay" type="button" disabled>Lecture</button>
+        <div class="time mono" id="gTime">0:00 / 0:00</div>
+        <div class="filters" id="gSolo" aria-label="Écoute">
+          <button data-s="both" class="on" type="button">A + B</button>
+          <button data-s="A" type="button">A seul</button>
+          <button data-s="B" type="button">B seul</button>
+        </div>
+        <div class="grow"><button class="pill" id="gZoneOff" type="button" hidden>Zone 0 Hz ×</button></div>
+      </div>
+      <div class="hintline" id="gHint">Les deux stems doivent démarrer au même moment, comme des pistes exportées de la même session.</div>
+    </section>
+
+    <section class="tl" id="gSpecCard" hidden>
+      <div class="cardhead">
+        <h3>Spectre moyen</h3>
+        <div class="legend mono"><span><i class="a"></i><span id="gLegA">A</span></span><span><i class="b"></i><span id="gLegB">B</span></span><span><i class="c"></i>Masquage</span></div>
+      </div>
+      <div class="chart spec"><canvas id="gSpec"></canvas></div>
+    </section>
+
+    <section class="tl" id="gHeatCard" hidden>
+      <div class="cardhead">
+        <h3>Dans le temps</h3>
+        <div class="legend mono"><span>Cliquez pour vous placer</span></div>
+      </div>
+      <div class="chart heat" id="gHeatWrap"><canvas id="gHeat"></canvas><div class="ph" id="gPh"></div></div>
+    </section>
+
+    <section class="opt" id="gZonesSec" hidden>
+      <h2 class="h2">Zones de conflit</h2>
+      <div id="gZones"></div>
+    </section>
+
+    <footer>
+      <div class="keys"><span>Espace : lecture</span><span>Écouter : isole la zone pendant la lecture</span></div>
+      <div>L’analyse se fait sur votre appareil. Rien n’est envoyé sur Internet.</div>
+    </footer>
+  </div>
 </main>
 
 <!-- Loudness meter (ITU-R BS.1770-4 integrated loudness + 4x oversampled true peak), run in a worker -->
@@ -529,8 +629,8 @@ onmessage = e => {
   const timeEl = $('#time');
   const warnEl = $('#warn');
   const loopEl = $('#loop');
-  const switchBtns = [...document.querySelectorAll('.switch button')];
-  const slots = [...document.querySelectorAll('.slot')];
+  const switchBtns = [...document.querySelectorAll('#view-comparo .switch button')];
+  const slots = [...document.querySelectorAll('#view-comparo .slot')];
   const slotOf = k => slots.find(s => s.dataset.k === k);
 
   // ---------- Presets ----------
@@ -799,7 +899,7 @@ onmessage = e => {
   });
   document.addEventListener('dragover', e => e.preventDefault());
   document.addEventListener('drop', e => {
-    if (document.body.dataset.view === 'notes') return;
+    if (document.body.dataset.view !== 'comparo') return;
     if (e.target.closest('.slot')) return;
     e.preventDefault();
     const files = [...e.dataTransfer.files];
@@ -967,7 +1067,7 @@ onmessage = e => {
   }));
 
   document.addEventListener('keydown', e => {
-    if (document.body.dataset.view === 'notes') return;
+    if (document.body.dataset.view !== 'comparo') return;
     if (e.target.tagName === 'TEXTAREA' || (e.target.tagName === 'INPUT' && e.target.type !== 'range' && e.target.type !== 'checkbox')) return;
     const key = e.key.toLowerCase();
     if (e.code === 'Space') { e.preventDefault(); playing ? pause() : play(); }
@@ -984,11 +1084,451 @@ onmessage = e => {
   updateOptions();
 })();
 </script>
+<!-- Masking analysis: STFT of both stems in 1/6-octave bands, run in a worker -->
+<script type="text/plain" id="ghost-src">
+function fft(re, im, cos, sin) {
+  const n = re.length;
+  for (let i = 1, j = 0; i < n; i++) {
+    let bit = n >> 1;
+    for (; j & bit; bit >>= 1) j ^= bit;
+    j ^= bit;
+    if (i < j) { let t = re[i]; re[i] = re[j]; re[j] = t; t = im[i]; im[i] = im[j]; im[j] = t; }
+  }
+  for (let size = 2; size <= n; size <<= 1) {
+    const half = size >> 1, step = n / size;
+    for (let i = 0; i < n; i += size) {
+      for (let j = 0, k = 0; j < half; j++, k += step) {
+        const a = i + j, b = a + half;
+        const tr = re[b] * cos[k] + im[b] * sin[k];
+        const ti = -re[b] * sin[k] + im[b] * cos[k];
+        re[b] = re[a] - tr; im[b] = im[a] - ti;
+        re[a] += tr; im[a] += ti;
+      }
+    }
+  }
+}
+onmessage = e => {
+  const { a, b, sr } = e.data;
+  const N = 8192;
+  const len = Math.max(a.length, b.length);
+  const hop = Math.max(2048, Math.ceil(Math.max(0, len - N) / 1800));
+  const frames = Math.max(1, Math.floor(Math.max(0, len - N) / hop) + 1);
+  const centers = [], lo = [], hi = [];
+  for (let k = 0; ; k++) {
+    const f = 31.5 * Math.pow(2, k / 6);
+    if (f > 16500 || f > sr / 2 * 0.9) break;
+    centers.push(f);
+    const l = f * Math.pow(2, -1 / 12), h = f * Math.pow(2, 1 / 12);
+    let bl = Math.ceil(l * N / sr), bh = Math.floor(h * N / sr);
+    if (bh < bl) bl = bh = Math.round(f * N / sr);
+    lo.push(bl); hi.push(bh);
+  }
+  const B = centers.length;
+  const cos = new Float64Array(N / 2), sin = new Float64Array(N / 2), win = new Float64Array(N);
+  for (let i = 0; i < N / 2; i++) { cos[i] = Math.cos(2 * Math.PI * i / N); sin[i] = Math.sin(2 * Math.PI * i / N); }
+  for (let i = 0; i < N; i++) win[i] = 0.5 - 0.5 * Math.cos(2 * Math.PI * i / (N - 1));
+  const re = new Float64Array(N), im = new Float64Array(N);
+  const spec = x => {
+    const L = new Float32Array(frames * B);
+    for (let t = 0; t < frames; t++) {
+      const o = t * hop;
+      for (let i = 0; i < N; i++) { const v = o + i < x.length ? x[o + i] : 0; re[i] = v * win[i]; im[i] = 0; }
+      fft(re, im, cos, sin);
+      for (let k = 0; k < B; k++) {
+        let p = 0;
+        for (let j = lo[k]; j <= hi[k]; j++) p += re[j] * re[j] + im[j] * im[j];
+        L[t * B + k] = 10 * Math.log10(p * 16 / (N * N) + 1e-20);
+      }
+      if (t % 50 === 0) postMessage({ progress: (t / frames) * 0.5 + (x === b ? 0.5 : 0) });
+    }
+    return L;
+  };
+  const LA = spec(a), LB = spec(b);
+  const stats = L => {
+    let g = -Infinity; const bm = new Float32Array(B).fill(-Infinity);
+    for (let t = 0; t < frames; t++) for (let k = 0; k < B; k++) { const v = L[t * B + k]; if (v > g) g = v; if (v > bm[k]) bm[k] = v; }
+    return { g, bm };
+  };
+  const sa = stats(LA), sb = stats(LB);
+  const clamp = v => v < 0 ? 0 : v > 1 ? 1 : v;
+  const C = new Float32Array(frames * B);
+  const sumC = new Float64Array(B), hits = new Float64Array(B), either = new Float64Array(B), diffW = new Float64Array(B);
+  const pA = new Float64Array(B), pB = new Float64Array(B), nA = new Float64Array(B), nB = new Float64Array(B);
+  for (let t = 0; t < frames; t++) for (let k = 0; k < B; k++) {
+    const i = t * B + k, la = LA[i], lb = LB[i];
+    const actA = la > sa.g - 50 && la > sa.bm[k] - 24;
+    const actB = lb > sb.g - 50 && lb > sb.bm[k] - 24;
+    if (la > sa.g - 70) { pA[k] += Math.pow(10, la / 10); nA[k]++; }
+    if (lb > sb.g - 70) { pB[k] += Math.pow(10, lb / 10); nB[k]++; }
+    if (actA || actB) either[k]++;
+    if (!(actA && actB)) continue;
+    const rel = Math.min(clamp((la - (sa.g - 50)) / 30), clamp((lb - (sb.g - 50)) / 30));
+    const c = clamp(1 - Math.abs(la - lb) / 12) * rel;
+    C[i] = c;
+    sumC[k] += c;
+    if (c > 0.3) { hits[k]++; diffW[k] += (la - lb) * c; }
+  }
+  const avgA = Array.from(pA, (p, k) => nA[k] ? 10 * Math.log10(p / nA[k]) : -120);
+  const avgB = Array.from(pB, (p, k) => nB[k] ? 10 * Math.log10(p / nB[k]) : -120);
+  const score = Array.from(sumC, s => s / frames);
+  const maxS = Math.max(...score, 0);
+  const zones = [];
+  if (maxS > 0.02) {
+    const thr = Math.max(0.03, maxS * 0.3);
+    let cur = null;
+    for (let k = 0; k <= B; k++) {
+      const on = k < B && score[k] >= thr;
+      if (on) {
+        if (!cur) cur = { k0: k, k1: k, score: 0, peak: k, hits: 0, either: 0, diff: 0, w: 0 };
+        cur.k1 = k; cur.score += score[k];
+        if (score[k] > score[cur.peak]) cur.peak = k;
+        cur.hits = Math.max(cur.hits, hits[k] / Math.max(1, either[k]));
+        cur.diff += diffW[k]; cur.w += sumC[k];
+      } else if (cur) {
+        zones.push({
+          lo: centers[cur.k0] * Math.pow(2, -1 / 12), hi: centers[cur.k1] * Math.pow(2, 1 / 12),
+          center: centers[cur.peak], score: cur.score, share: cur.hits,
+          diff: cur.w ? cur.diff / cur.w : 0,
+        });
+        cur = null;
+      }
+    }
+    zones.sort((x, y) => y.score - x.score);
+    zones.splice(6);
+  }
+  postMessage({ done: true, frames, B, hop, N, sr, centers, C, avgA, avgB, zones }, [C.buffer]);
+};
+</script>
+
+<script>
+// ---------- Ghost: masking detector ----------
+(() => {
+  const $ = id => document.getElementById(id);
+  const view = $('view-ghost');
+  const slots = [...view.querySelectorAll('.slot')];
+  const slotOf = k => slots.find(s => s.dataset.k === k);
+  const tracks = { A: null, B: null };   // { name, short, buffer }
+  let ctx = null, gains = {}, mix = null, bp = null, sources = [];
+  let playing = false, startCtxTime = 0, pauseOffset = 0, raf = 0;
+  let solo = 'both', zoneSel = null, an = null, heatImg = null, jobId = 0;
+
+  const fmt = s => { s = Math.max(0, s || 0); const m = Math.floor(s / 60), r = Math.floor(s % 60); return `${m}:${String(r).padStart(2, '0')}`; };
+  const fmtF = f => f < 1000 ? `${Math.round(f)} Hz` : `${(Math.round(f / 100) / 10).toLocaleString('fr-FR')} kHz`;
+  const fmtRange = (a, b) => (a < 1000 && b < 1000) ? `${Math.round(a)}–${Math.round(b)} Hz` : `${fmtF(a)} – ${fmtF(b)}`;
+  const region = f => f < 60 ? 'Sub' : f < 250 ? 'Grave' : f < 500 ? 'Bas-médium' : f < 2000 ? 'Médium' : f < 4000 ? 'Haut-médium' : f < 8000 ? 'Présence' : 'Air';
+  const css = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+  const duration = () => Math.max(tracks.A?.buffer.duration || 0, tracks.B?.buffer.duration || 0);
+  const position = () => playing ? ctx.currentTime - startCtxTime : pauseOffset;
+  const label = k => tracks[k] ? `${k} (${tracks[k].short})` : k;
+
+  function ensureCtx() {
+    if (ctx) return;
+    ctx = new AudioContext({ latencyHint: 'playback' });
+    mix = ctx.createGain();
+    bp = ctx.createBiquadFilter(); bp.type = 'bandpass';
+    for (const k of ['A', 'B']) { gains[k] = ctx.createGain(); gains[k].connect(mix); }
+    applySolo(true); route();
+  }
+  function route() {
+    mix.disconnect(); bp.disconnect();
+    if (zoneSel && an) {
+      const z = an.zones[zoneSel - 1];
+      bp.frequency.value = Math.sqrt(z.lo * z.hi);
+      bp.Q.value = Math.min(8, Math.max(0.8, Math.sqrt(z.lo * z.hi) / (z.hi - z.lo)));
+      mix.connect(bp); bp.connect(ctx.destination);
+    } else mix.connect(ctx.destination);
+  }
+  function applySolo(now) {
+    if (!ctx) return;
+    const t = ctx.currentTime;
+    for (const k of ['A', 'B']) {
+      const v = solo === 'both' || solo === k ? 1 : 0, g = gains[k].gain;
+      if (now) { g.value = v; continue; }
+      g.cancelScheduledValues(t); g.setValueAtTime(g.value, t); g.linearRampToValueAtTime(v, t + 0.01);
+    }
+  }
+
+  // ---------- Loading ----------
+  async function load(k, file) {
+    if (!file) return;
+    const was = playing; if (playing) pause();
+    const slot = slotOf(k);
+    slot.querySelector('.name').textContent = file.name;
+    slot.querySelector('.meta').textContent = 'Chargement…';
+    try {
+      ensureCtx();
+      const buffer = await ctx.decodeAudioData(await file.arrayBuffer());
+      tracks[k] = { name: file.name, short: file.name.replace(/\.[^.]+$/, '').slice(0, 24), buffer };
+      slot.querySelector('.meta').textContent = `${(buffer.sampleRate / 1000).toLocaleString('fr-FR')} kHz · ${buffer.numberOfChannels === 1 ? 'mono' : 'stéréo'} · ${fmt(buffer.duration)}`;
+      slot.classList.add('loaded');
+    } catch (e) {
+      tracks[k] = null; slot.classList.remove('loaded', 'active');
+      slot.querySelector('.meta').textContent = 'Fichier illisible';
+    }
+    an = null; zoneSel = null; heatImg = null;
+    updateUI(); render();
+    if (tracks.A && tracks.B) analyze();
+    if (was) play();
+  }
+
+  const workerURL = URL.createObjectURL(new Blob([$('ghost-src').textContent], { type: 'text/javascript' }));
+  function monoOf(buf) {
+    const n = buf.length, out = new Float32Array(n), ch = buf.numberOfChannels;
+    for (let c = 0; c < ch; c++) { const d = buf.getChannelData(c); for (let i = 0; i < n; i++) out[i] += d[i] / ch; }
+    return out;
+  }
+  function analyze() {
+    const id = ++jobId;
+    $('gBanner').textContent = 'Analyse des fréquences…';
+    const a = monoOf(tracks.A.buffer), b = monoOf(tracks.B.buffer);
+    const d = Math.abs(tracks.A.buffer.duration - tracks.B.buffer.duration);
+    $('gHint').textContent = d > 1
+      ? `Les deux stems n’ont pas la même durée (écart de ${fmt(d)}). Vérifiez qu’ils démarrent au même moment, sinon les zones détectées seront fausses.`
+      : 'Les deux stems doivent démarrer au même moment, comme des pistes exportées de la même session.';
+    const w = new Worker(workerURL);
+    w.onmessage = e => {
+      if (id !== jobId) { w.terminate(); return; }
+      if (e.data.progress != null) { $('gBanner').textContent = `Analyse des fréquences… ${Math.round(e.data.progress * 100)} %`; return; }
+      w.terminate();
+      an = e.data; heatImg = null;
+      render();
+    };
+    w.onerror = () => { w.terminate(); $('gBanner').textContent = 'L’analyse a échoué. Essayez avec des fichiers WAV.'; };
+    w.postMessage({ a, b, sr: tracks.A.buffer.sampleRate }, [a.buffer, b.buffer]);
+  }
+
+  // ---------- Rendering ----------
+  function render() {
+    const has = !!an;
+    $('gSpecCard').hidden = $('gHeatCard').hidden = $('gZonesSec').hidden = !has;
+    if (!has) {
+      if (!(tracks.A && tracks.B)) $('gBanner').textContent = !tracks.A && !tracks.B ? 'Chargez deux stems · A et B' : `Ajoutez le stem ${tracks.A ? 'B' : 'A'}`;
+      return;
+    }
+    const z = an.zones;
+    $('gBanner').textContent = z.length
+      ? `${z.length} zone${z.length > 1 ? 's' : ''} de masquage · la plus marquée vers ${fmtF(z[0].center)}`
+      : 'Aucun masquage marqué entre A et B';
+    $('gLegA').textContent = label('A'); $('gLegB').textContent = label('B');
+    renderZones();
+    requestAnimationFrame(() => { drawSpec(); drawHeat(); updateTime(); });
+  }
+
+  function advice(z) {
+    const close = Math.abs(z.diff) < 1.5;
+    const strong = z.diff > 0 ? 'A' : 'B', weak = z.diff > 0 ? 'B' : 'A';
+    const at = fmtF(z.center), r = region(z.center), inter = z.share < 0.4;
+    const who = close ? 'Décidez lequel des deux doit occuper cette zone, puis' : `${strong} domine ici :`;
+    const target = close ? 'creusez l’autre' : `creusez ${weak}`;
+    if (r === 'Sub' || r === 'Grave') return inter
+      ? `Conflit par moments vers ${at}. Un sidechain ou un EQ dynamique sur l’un des deux, déclenché par l’autre, libère la place seulement quand ils jouent ensemble.`
+      : `${who} ${target} de 2 à 4 dB vers ${at} avec un Q moyen. Si le grave n’est pas son rôle, un filtre passe-haut juste en dessous aide aussi.`;
+    if (r === 'Bas-médium') return `${who} ${target} de 2 à 3 dB vers ${at}. C’est souvent là que le mix devient boueux.`;
+    if (r === 'Médium' || r === 'Haut-médium') return `${who} ${target} de 2 à 3 dB vers ${at} pour laisser l’autre devant. Un panoramique différent peut aussi les séparer.`;
+    return `${who} ${target} de 1 à 3 dB vers ${at}, ou décalez la zone de brillance de l’un des deux.`;
+  }
+
+  function renderZones() {
+    const box = $('gZones'); box.replaceChildren();
+    if (!an.zones.length) {
+      const e = document.createElement('div'); e.className = 'empty';
+      e.textContent = 'Les deux stems occupent des zones de fréquences différentes, ou l’un est nettement plus fort que l’autre partout où ils se croisent.';
+      box.append(e); return;
+    }
+    const top = an.zones[0].score;
+    an.zones.forEach((z, i) => {
+      const row = document.createElement('div'); row.className = 'zone' + (zoneSel === i + 1 ? ' on' : '');
+      const l = document.createElement('div');
+      const t = document.createElement('div'); t.className = 't';
+      const bb = document.createElement('b'); bb.textContent = fmtRange(z.lo, z.hi);
+      t.append(bb, ` · ${region(z.center)}`);
+      const s = document.createElement('div'); s.className = 's';
+      const dom = Math.abs(z.diff) < 1.5 ? 'niveaux très proches' : `${z.diff > 0 ? 'A' : 'B'} plus fort de ${Math.round(Math.abs(z.diff) * 10) / 10} dB`.replace('.', ',');
+      s.textContent = `Masquage ${Math.round(z.share * 100)} % du temps · ${dom}`;
+      l.append(t, s);
+      const btn = document.createElement('button'); btn.type = 'button';
+      btn.className = 'pill' + (zoneSel === i + 1 ? ' on' : '');
+      btn.textContent = zoneSel === i + 1 ? 'Arrêter' : 'Écouter';
+      btn.addEventListener('click', () => setZone(zoneSel === i + 1 ? null : i + 1));
+      const m = document.createElement('div'); m.className = 'meter';
+      const mi = document.createElement('i'); mi.style.width = Math.max(4, z.score / top * 100) + '%'; m.append(mi);
+      const adv = document.createElement('div'); adv.className = 'adv'; adv.textContent = advice(z);
+      row.append(l, btn, m, adv);
+      box.append(row);
+    });
+  }
+
+  function setZone(n) {
+    zoneSel = n;
+    if (ctx) route();
+    const z = n && an.zones[n - 1];
+    $('gZoneOff').hidden = !z;
+    if (z) $('gZoneOff').textContent = `Zone ${fmtRange(z.lo, z.hi)} ×`;
+    renderZones(); drawSpec();
+    if (z && !playing && (tracks.A || tracks.B)) play();
+  }
+
+  function sizeCanvas(cv) {
+    const w = cv.clientWidth, h = cv.clientHeight, dpr = window.devicePixelRatio || 1;
+    if (!w || !h) return null;
+    if (cv.width !== Math.round(w * dpr) || cv.height !== Math.round(h * dpr)) { cv.width = Math.round(w * dpr); cv.height = Math.round(h * dpr); }
+    const g = cv.getContext('2d'); g.setTransform(dpr, 0, 0, dpr, 0, 0); g.clearRect(0, 0, w, h);
+    return { g, w, h };
+  }
+  const F0 = 25, F1 = 18000;
+  const xOf = (f, w) => Math.log(f / F0) / Math.log(F1 / F0) * w;
+
+  function drawSpec() {
+    if (!an || view.hidden) return;
+    const c = sizeCanvas($('gSpec')); if (!c) return;
+    const { g, w } = c, h = c.h - 22;
+    const top = Math.max(...an.avgA, ...an.avgB) + 3, range = 60;
+    const yOf = db => Math.min(h, Math.max(0, (top - db) / range * h));
+    g.font = '10px ' + css('--mono'); g.textAlign = 'center';
+    for (const f of [50, 100, 200, 500, 1000, 2000, 5000, 10000]) {
+      const x = xOf(f, w);
+      g.fillStyle = css('--line'); g.fillRect(x, 0, 1, h);
+      g.fillStyle = css('--muted'); g.fillText(f >= 1000 ? (f / 1000) + 'k' : String(f), x, h + 15);
+    }
+    const coral = css('--coral'), topS = an.zones[0]?.score || 1;
+    an.zones.forEach((z, i) => {
+      const x0 = xOf(z.lo, w), x1 = xOf(z.hi, w);
+      g.globalAlpha = 0.18 + 0.4 * (z.score / topS);
+      g.fillStyle = coral; g.fillRect(x0, 0, x1 - x0, h);
+      if (zoneSel === i + 1) { g.globalAlpha = 1; g.strokeStyle = css('--coral-hi'); g.lineWidth = 1.5; g.strokeRect(x0 + .75, .75, x1 - x0 - 1.5, h - 1.5); }
+    });
+    g.globalAlpha = 1;
+    const curve = (arr, color) => {
+      g.beginPath();
+      an.centers.forEach((f, k) => { const x = xOf(f, w), y = yOf(arr[k]); k ? g.lineTo(x, y) : g.moveTo(x, y); });
+      g.strokeStyle = color; g.lineWidth = 2; g.lineJoin = 'round'; g.stroke();
+    };
+    curve(an.avgA, css('--ink'));
+    curve(an.avgB, css('--mint'));
+  }
+
+  function drawHeat() {
+    if (!an || view.hidden) return;
+    const c = sizeCanvas($('gHeat')); if (!c) return;
+    const { g, w } = c, h = c.h - 22;
+    const { frames, B, C } = an;
+    if (!heatImg) {
+      heatImg = document.createElement('canvas'); heatImg.width = frames; heatImg.height = B;
+      const ig = heatImg.getContext('2d'), img = ig.createImageData(frames, B);
+      const hex = css('--coral').replace('#', ''), r = parseInt(hex.slice(0, 2), 16), gg = parseInt(hex.slice(2, 4), 16), bl = parseInt(hex.slice(4, 6), 16);
+      for (let t = 0; t < frames; t++) for (let k = 0; k < B; k++) {
+        const p = ((B - 1 - k) * frames + t) * 4, v = C[t * B + k];
+        img.data[p] = r; img.data[p + 1] = gg; img.data[p + 2] = bl; img.data[p + 3] = Math.round(Math.min(1, v * 1.4) * 255);
+      }
+      ig.putImageData(img, 0, 0);
+    }
+    const d = duration() || 1, span = Math.min(1, (frames * an.hop + an.N) / an.sr / d);
+    g.fillStyle = css('--bg'); g.fillRect(0, 0, w, h);
+    g.imageSmoothingEnabled = true;
+    g.drawImage(heatImg, 0, 0, w * span, h);
+    const yOfF = f => h - (Math.log(f / an.centers[0]) / Math.log(an.centers[B - 1] / an.centers[0])) * h;
+    g.font = '10px ' + css('--mono'); g.textAlign = 'left';
+    for (const f of [100, 1000, 10000]) {
+      const y = yOfF(f); if (y < 0 || y > h) continue;
+      g.fillStyle = css('--line'); g.fillRect(0, y, w, 1);
+      g.fillStyle = css('--muted'); g.fillText(f >= 1000 ? (f / 1000) + ' kHz' : f + ' Hz', 4, y - 4);
+    }
+    g.textAlign = 'center'; g.fillStyle = css('--muted');
+    for (const p of [0, .25, .5, .75, 1]) { g.textAlign = p === 0 ? 'left' : p === 1 ? 'right' : 'center'; g.fillText(fmt(d * p), w * p, h + 15); }
+  }
+  window.addEventListener('resize', () => { drawSpec(); drawHeat(); });
+
+  // ---------- Transport ----------
+  function stopSources() { for (const s of sources) { try { s.stop(); } catch {} s.disconnect(); } sources = []; }
+  async function play() {
+    if (!tracks.A && !tracks.B) return;
+    ensureCtx(); await ctx.resume();
+    if (pauseOffset >= duration()) pauseOffset = 0;
+    stopSources();
+    const when = ctx.currentTime + 0.05;
+    for (const k of ['A', 'B']) {
+      const t = tracks[k]; if (!t || pauseOffset >= t.buffer.duration) continue;
+      const s = ctx.createBufferSource(); s.buffer = t.buffer; s.connect(gains[k]); s.start(when, pauseOffset); sources.push(s);
+    }
+    startCtxTime = when - pauseOffset; playing = true; updateUI(); tick();
+  }
+  function pause() {
+    if (!playing) return;
+    pauseOffset = Math.min(position(), duration()); playing = false; stopSources(); cancelAnimationFrame(raf); updateUI();
+  }
+  function seekTo(t) { pauseOffset = Math.max(0, Math.min(t, duration())); if (playing) play(); else updateTime(); }
+  function tick() {
+    cancelAnimationFrame(raf);
+    const step = () => {
+      if (!playing) return;
+      if (position() >= duration()) { playing = false; pauseOffset = 0; stopSources(); updateUI(); return; }
+      updateTime(); raf = requestAnimationFrame(step);
+    };
+    raf = requestAnimationFrame(step);
+  }
+  function updateTime() {
+    const d = duration(), p = Math.min(position(), d);
+    $('gTime').textContent = `${fmt(p)} / ${fmt(d)}`;
+    $('gPh').style.left = (d ? p / d * 100 : 0) + '%';
+  }
+  function updateUI() {
+    const any = !!(tracks.A || tracks.B);
+    $('gPlay').disabled = !any;
+    $('gPlay').textContent = playing ? 'Pause' : 'Lecture';
+    $('gPlay').classList.toggle('playing', playing);
+    slots.forEach(s => s.classList.toggle('active', !!tracks[s.dataset.k] && (solo === 'both' || solo === s.dataset.k)));
+    view.querySelectorAll('#gSolo button').forEach(b => { b.classList.toggle('on', b.dataset.s === solo); b.disabled = b.dataset.s !== 'both' && !tracks[b.dataset.s]; });
+    updateTime();
+  }
+
+  $('gPlay').addEventListener('click', () => playing ? pause() : play());
+  view.querySelectorAll('#gSolo button').forEach(b => b.addEventListener('click', () => { solo = b.dataset.s; applySolo(false); updateUI(); }));
+  $('gZoneOff').addEventListener('click', () => setZone(null));
+  $('gHeatWrap').addEventListener('click', e => {
+    const r = $('gHeatWrap').getBoundingClientRect();
+    seekTo((e.clientX - r.left) / r.width * duration());
+  });
+
+  slots.forEach(slot => {
+    const k = slot.dataset.k, input = slot.querySelector('input');
+    slot.addEventListener('click', e => { if (e.target !== input) input.click(); });
+    slot.querySelector('.replace').addEventListener('click', e => { e.stopPropagation(); input.click(); });
+    input.addEventListener('change', () => { load(k, input.files[0]); input.value = ''; });
+    slot.addEventListener('dragover', e => { e.preventDefault(); slot.classList.add('drag'); });
+    slot.addEventListener('dragleave', () => slot.classList.remove('drag'));
+    slot.addEventListener('drop', e => {
+      e.preventDefault(); e.stopPropagation(); slot.classList.remove('drag');
+      const f = [...e.dataTransfer.files];
+      if (f.length >= 2) load('A', f[0]).then(() => load('B', f[1])); else load(k, f[0]);
+    });
+  });
+  view.addEventListener('dragover', e => e.preventDefault());
+  view.addEventListener('drop', e => {
+    e.preventDefault();
+    const f = [...e.dataTransfer.files];
+    if (f.length >= 2) load('A', f[0]).then(() => load('B', f[1]));
+    else if (f[0]) load(!tracks.A ? 'A' : 'B', f[0]);
+  });
+  document.addEventListener('keydown', e => {
+    if (document.body.dataset.view !== 'ghost') return;
+    const t = e.target;
+    if (t.tagName === 'TEXTAREA' || (t.tagName === 'INPUT' && !['range', 'checkbox'].includes(t.type))) return;
+    if (e.code === 'Space') { e.preventDefault(); playing ? pause() : play(); }
+  });
+
+  window.ghostApp = {
+    pause,
+    onShow: v => { if (v) requestAnimationFrame(() => { drawSpec(); drawHeat(); }); },
+  };
+  updateUI();
+})();
+</script>
+
 <script>
 // ---------- App switch: Comparo ⇄ Notes ----------
 (() => {
-  const views = { comparo: document.getElementById('view-comparo'), notes: document.getElementById('view-notes') };
-  const names = { comparo: 'COMPARO', notes: 'NOTES' };
+  const views = { comparo: document.getElementById('view-comparo'), notes: document.getElementById('view-notes'), ghost: document.getElementById('view-ghost') };
+  const names = { comparo: 'COMPARO', notes: 'NOTES', ghost: 'GHOST' };
   function show(v) {
     if (!views[v]) v = 'comparo';
     if (document.body.dataset.view === v) return;
@@ -996,10 +1536,13 @@ onmessage = e => {
     for (const k in views) views[k].hidden = k !== v;
     document.getElementById('appName').textContent = names[v];
     document.getElementById('appLogo').classList.toggle('notes', v === 'notes');
+    document.getElementById('appLogo').classList.toggle('ghost', v === 'ghost');
     document.querySelectorAll('.apps button').forEach(b => b.classList.toggle('on', b.dataset.app === v));
-    if (v === 'notes') window.comparo?.pause();
-    else window.notesApp?.pause();
+    if (v !== 'comparo') window.comparo?.pause();
+    if (v !== 'notes') window.notesApp?.pause();
+    if (v !== 'ghost') window.ghostApp?.pause();
     window.notesApp?.onShow(v === 'notes');
+    window.ghostApp?.onShow(v === 'ghost');
   }
   document.querySelectorAll('.apps button').forEach(b => b.addEventListener('click', () => {
     show(b.dataset.app);

@@ -58,6 +58,17 @@ Les projets et les notes sont enregistrés dans le navigateur (ou sur votre comp
 
 La version précédente, sans Notes, est conservée dans `versions/comparo-v1.html`.
 
+## Ghost
+
+Troisième outil, accessible par le sélecteur **Comparo / Notes / Ghost**, ou directement avec l'adresse `#ghost`. C'est un détecteur de masquage : chargez deux stems (kick et basse, voix et guitare…) exportés depuis le même point de départ.
+
+- **Spectre moyen** : les deux spectres superposés, avec les zones de conflit en corail.
+- **Dans le temps** : où et quand les deux stems se masquent (cliquez pour vous placer).
+- **Zones de conflit** : jusqu'à six plages de fréquences classées, avec la part du temps où elles se masquent, le stem le plus fort et une piste de correction (EQ ou sidechain si le conflit est intermittent).
+- **Écouter** : isole la zone avec un filtre passe-bande pendant la lecture, avec A + B, A seul ou B seul.
+
+L'analyse se fait en tranches de 1/6 d'octave : deux stems sont en conflit dans une tranche quand ils y sont tous deux présents au même moment, avec des niveaux proches (moins de 12 dB d'écart).
+
 ## Qualité audio
 
 - Le contexte audio tourne à la fréquence d'échantillonnage native du fichier (lue dans l'en-tête WAV), ce qui évite tout rééchantillonnage par le navigateur.
