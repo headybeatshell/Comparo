@@ -45,6 +45,19 @@ Choisir une plateforme applique le gain qu'elle utiliserait et affiche le niveau
 | Apple Music (Sound Check) | −16 LUFS | montés dans la limite de leur marge de crête |
 | YouTube | −14 LUFS | jamais montés |
 
+## Notes
+
+Un deuxième outil, accessible par le sélecteur **Comparo / Notes** en haut de page, ou directement avec l'adresse `#notes`.
+
+- **Projets** : suivez vos morceaux inachevés par étape (Idée, Composition, Arrangement, Mix, Master, Terminé). Un projet non modifié depuis 14 jours est signalé comme « en pause ».
+- **Versions (bounces)** : déposez un fichier audio sur la page d'un projet pour l'ajouter comme V1, V2, V3… avec un commentaire sur ce qui change.
+- **Notes sur la timeline** : pendant la lecture, commencez à taper (ou appuyez sur `N`) : la note est placée à l'instant où vous avez commencé. Cliquez sur un repère ou sur l'heure d'une note pour y revenir.
+- **Vers Comparo** : « Mettre en A / B » envoie une version dans Comparo pour la comparer à une autre.
+
+Les projets et les notes sont enregistrés dans le navigateur (ou sur votre compte quand la page est ouverte sur claude.ai). Les fichiers audio ne sont jamais envoyés : la forme d'onde et les notes sont gardées, mais il faut associer à nouveau le fichier pour réécouter une version lors d'une prochaine visite.
+
+La version précédente, sans Notes, est conservée dans `versions/comparo-v1.html`.
+
 ## Qualité audio
 
 - Le contexte audio tourne à la fréquence d'échantillonnage native du fichier (lue dans l'en-tête WAV), ce qui évite tout rééchantillonnage par le navigateur.

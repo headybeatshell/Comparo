@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Comparo</title>
+<title>Comparo Notes</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@300;400;500&family=Inter:wght@300;400;500&family=IBM+Plex+Mono:wght@400&display=swap">
@@ -20,6 +20,7 @@
     color-scheme: dark;
   }
   * { box-sizing: border-box; }
+  [hidden] { display: none !important; }
   html, body { margin: 0; min-height: 100%; }
   body {
     background: var(--bg); color: var(--ink);
@@ -138,6 +139,129 @@
 
   footer { text-align: center; color: var(--muted); display: flex; flex-direction: column; gap: 8px; font-size: 15px; }
   footer .keys { display: flex; justify-content: center; flex-wrap: wrap; gap: 6px 22px; }
+  /* App switch + Notes */
+  .apps { display: flex; justify-content: center; gap: 8px; margin-top: -24px; }
+  .apps button {
+    height: 36px; padding: 0 18px; border-radius: 999px; cursor: pointer;
+    background: transparent; border: 1.5px solid var(--line); color: var(--muted);
+    font-family: var(--mono); font-size: 12px; letter-spacing: .18em; text-transform: uppercase;
+  }
+  .apps button:hover { color: var(--ink); border-color: var(--muted); }
+  .apps button.on { background: var(--white); border-color: var(--white); color: var(--black); }
+  .logo.notes::before {
+    width: 16px; height: 13px; border-radius: 0;
+    background: linear-gradient(var(--bg) 0 2.5px, transparent 2.5px 5.25px, var(--bg) 5.25px 7.75px, transparent 7.75px 10.5px, var(--bg) 10.5px 13px);
+  }
+  .view { display: flex; flex-direction: column; gap: 44px; }
+
+  .pill {
+    font-family: var(--mono); font-size: 12px; letter-spacing: .14em; text-transform: uppercase;
+    background: transparent; border: 1px solid var(--line); color: var(--ink);
+    border-radius: 999px; padding: 10px 16px; cursor: pointer; white-space: nowrap;
+  }
+  .pill:hover:not(:disabled) { border-color: var(--muted); }
+  .pill:disabled { opacity: .35; cursor: default; }
+  .pill.primary { background: var(--mint); border-color: var(--mint); color: var(--mint-ink); }
+  .pill.danger { color: var(--muted); }
+  .pill.danger.armed { border-color: var(--coral); color: var(--coral-hi); }
+  .listhead { display: flex; justify-content: space-between; align-items: flex-end; gap: 16px; flex-wrap: wrap; }
+  .listhead .h2 { margin: 0; }
+  .filters { display: flex; flex-wrap: wrap; gap: 8px; margin: 18px 0 6px; }
+  .filters button, .stages button {
+    height: 34px; padding: 0 14px; border-radius: 999px; cursor: pointer;
+    background: transparent; border: 1px solid var(--line); color: var(--muted);
+    font-family: var(--mono); font-size: 11.5px; letter-spacing: .14em; text-transform: uppercase;
+  }
+  .filters button:hover, .stages button:hover { color: var(--ink); border-color: var(--muted); }
+  .filters button.on, .stages button.on { background: var(--white); border-color: var(--white); color: var(--black); }
+
+  .rows { display: flex; flex-direction: column; }
+  .rows > button {
+    display: flex; justify-content: space-between; align-items: center; gap: 16px;
+    background: none; border: none; border-bottom: 1px solid var(--line);
+    padding: 18px 0; text-align: left; cursor: pointer; color: var(--ink); width: 100%;
+  }
+  .rows > button:hover .t { text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: 4px; }
+  .rows .l { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+  .rows .t { font-family: var(--display); font-weight: 300; font-size: 24px; letter-spacing: -0.02em; line-height: 1.15; overflow-wrap: anywhere; }
+  .rows .s { font-family: var(--mono); font-size: 11.5px; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); overflow-wrap: anywhere; }
+  .rows .s.stale { color: var(--coral-hi); }
+  .rows .r { display: flex; align-items: center; gap: 12px; flex: none; }
+  .rows .d {
+    font-family: var(--mono); font-size: 12px; letter-spacing: .14em; text-transform: uppercase;
+    background: var(--chip); border: 1px solid var(--line); border-radius: 10px; padding: 7px 12px; color: var(--muted);
+  }
+  .rows .d.done { background: var(--mint); border-color: var(--mint); color: var(--mint-ink); }
+  .rows .c { font-family: var(--mono); font-size: 12px; letter-spacing: .1em; color: var(--muted); text-transform: uppercase; }
+  .rows .dot { width: 10px; height: 10px; border-radius: 50%; background: transparent; flex: none; }
+  .rows > button.on .dot { background: var(--mint); }
+  .rows > button.on .t { font-weight: 400; }
+  .empty { color: var(--muted); padding: 22px 0; border-bottom: 1px solid var(--line); max-width: 60ch; }
+
+  .back { align-self: flex-start; background: none; border: none; color: var(--muted); cursor: pointer; padding: 0; }
+  .back:hover { color: var(--ink); }
+  .phead { display: flex; flex-direction: column; gap: 14px; margin-top: -20px; }
+  .ptitle {
+    width: 100%; background: transparent; border: none; border-bottom: 1px solid transparent; color: var(--ink);
+    font-family: var(--display); font-weight: 300; font-size: clamp(40px, 9vw, 68px); letter-spacing: -0.035em; line-height: 1.1; padding: 0 0 4px;
+  }
+  .ptitle:hover, .ptitle:focus { border-bottom-color: var(--line); outline: none; }
+  .pmeta { color: var(--muted); }
+  .stages { display: flex; flex-wrap: wrap; gap: 8px; }
+  textarea.pnotes, .field {
+    width: 100%; background: var(--chip); border: 1px solid var(--line); border-radius: 16px; color: var(--ink);
+    font: 300 16px/1.5 var(--text); padding: 14px 16px;
+  }
+  textarea.pnotes { min-height: 110px; resize: vertical; }
+  textarea.pnotes:focus, .field:focus { outline: none; border-color: var(--muted); }
+  ::placeholder { color: var(--muted); opacity: .8; }
+
+  .tl { border-radius: 24px; border: 1px solid var(--line); background: var(--chip); padding: 22px 20px; display: flex; flex-direction: column; gap: 18px; }
+  .tl-head { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; flex-wrap: wrap; }
+  .tl-head .v { font-family: var(--display); font-weight: 400; font-size: 34px; letter-spacing: -0.03em; line-height: 1; }
+  .tl-head .f { color: var(--muted); overflow-wrap: anywhere; }
+  .wave { position: relative; height: 128px; cursor: pointer; touch-action: manipulation; }
+  .wave canvas { width: 100%; height: 100%; display: block; }
+  .wave .ph { position: absolute; top: 0; bottom: 0; width: 1.5px; background: var(--white); pointer-events: none; }
+  .wave .mk {
+    position: absolute; top: 0; bottom: 0; width: 14px; margin-left: -7px; padding: 0; border: none; background: none; cursor: pointer;
+  }
+  .wave .mk::before { content: ""; position: absolute; left: 6.25px; top: 8px; bottom: 0; width: 1.5px; background: var(--mint); opacity: .7; }
+  .wave .mk::after { content: ""; position: absolute; left: 2px; top: 0; width: 10px; height: 10px; border-radius: 50%; background: var(--mint); }
+  .wave .nowave { position: absolute; inset: 0; display: grid; place-items: center; color: var(--muted); border: 1px dashed var(--line); border-radius: 14px; text-align: center; padding: 12px; }
+  .tl-transport { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
+  .mini-play {
+    width: 72px; height: 72px; border-radius: 50%; border: none; cursor: pointer; flex: none;
+    background: radial-gradient(circle at 50% 50%, var(--green) 62%, var(--green-hi) 100%);
+    color: var(--white); font-family: var(--display); font-weight: 400; font-size: 15px;
+    box-shadow: 0 0 36px rgba(0, 168, 107, .25);
+  }
+  .mini-play.playing { background: radial-gradient(circle at 50% 50%, var(--coral) 62%, var(--coral-hi) 100%); box-shadow: 0 0 40px rgba(224, 96, 79, .35); }
+  .mini-play:disabled { opacity: .3; cursor: default; box-shadow: none; }
+  .tl-transport .grow { flex: 1; display: flex; gap: 8px; flex-wrap: wrap; justify-content: flex-end; }
+  .hintline { color: var(--muted); font-size: 14px; }
+  .hintline:empty { display: none; }
+  .noteadd { display: flex; align-items: center; gap: 12px; }
+  .noteadd .at {
+    font-family: var(--mono); font-size: 12px; letter-spacing: .1em; flex: none;
+    background: var(--mint); color: var(--mint-ink); border-radius: 10px; padding: 7px 10px; font-variant-numeric: tabular-nums;
+  }
+  .noteadd input {
+    flex: 1; min-width: 0; background: transparent; border: none; border-bottom: 1px solid var(--line);
+    color: var(--ink); font: 300 18px/1.4 var(--text); padding: 8px 0;
+  }
+  .noteadd input:focus { outline: none; border-bottom-color: var(--muted); }
+  .nlist { display: flex; flex-direction: column; }
+  .nrow { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; gap: 14px; align-items: baseline; border-bottom: 1px solid var(--line); padding: 12px 0; }
+  .nrow .tt { background: none; border: none; padding: 0; cursor: pointer; color: var(--mint); font-family: var(--mono); font-size: 13px; letter-spacing: .08em; font-variant-numeric: tabular-nums; }
+  .nrow .tx { overflow-wrap: anywhere; }
+  .nrow .x { background: none; border: none; color: var(--muted); cursor: pointer; font-size: 20px; line-height: 1; padding: 0 4px; }
+  .nrow .x:hover { color: var(--coral-hi); }
+  .nrow.flash { background: color-mix(in srgb, var(--mint) 10%, transparent); }
+  .actions { display: flex; justify-content: flex-end; gap: 8px; flex-wrap: wrap; }
+  .storemsg { color: var(--warn); }
+  .storemsg:empty { display: none; }
+  .dropping .tl, .dropping #bounceList { outline: 1.5px dashed var(--mint); outline-offset: 6px; border-radius: 12px; }
   @media (max-width: 560px) {
     .slots { grid-template-columns: 1fr; }
     .slot { min-height: 0; }
@@ -152,7 +276,10 @@
 </head>
 <body>
 <main>
-  <header class="top"><div class="logo" aria-hidden="true"></div><span>COMPARO</span></header>
+  <header class="top"><div class="logo" id="appLogo" aria-hidden="true"></div><span id="appName">COMPARO</span></header>
+  <nav class="apps" aria-label="Changer d’outil"><button type="button" data-app="comparo" class="on">Comparo</button><button type="button" data-app="notes">Notes</button></nav>
+
+  <div class="view" id="view-comparo">
 
   <div class="banner mono" id="banner"><span id="bannerText">Déposez deux fichiers · A et B</span><span aria-hidden="true">↓</span></div>
 
@@ -222,6 +349,85 @@
     <div class="keys"><span>Espace : lecture</span><span>Tab : basculer A/B</span><span>A ou B : choisir</span></div>
     <div>Comparo lit vos fichiers localement. Rien n’est envoyé sur Internet.</div>
   </footer>
+  </div>
+
+  <div class="view" id="view-notes" hidden>
+    <div class="banner mono"><span id="notesBanner">Chargement de vos projets…</span><span aria-hidden="true">↓</span></div>
+
+    <h1 class="hero" id="notesHero">Chaque version, jusqu’au master</h1>
+
+    <section id="projList">
+      <div class="listhead">
+        <h2 class="h2">Projets</h2>
+        <button class="pill primary" id="newProj" type="button">+ Nouveau projet</button>
+      </div>
+      <div class="filters" id="projFilter">
+        <button data-f="open" class="on" type="button">En cours</button>
+        <button data-f="done" type="button">Terminés</button>
+        <button data-f="all" type="button">Tous</button>
+      </div>
+      <div class="rows" id="projRows"></div>
+    </section>
+
+    <section id="projDetail" class="view" hidden>
+      <button class="back mono" id="backBtn" type="button">← Projets</button>
+      <div class="phead">
+        <input class="ptitle" id="pName" aria-label="Nom du projet" maxlength="120">
+        <div class="pmeta mono" id="pMeta"></div>
+        <div class="stages" id="pStatus" aria-label="Étape du projet"></div>
+        <textarea class="pnotes" id="pNotes" placeholder="Notes du projet : ce qu’il reste à faire, idées, références…"></textarea>
+      </div>
+
+      <section>
+        <div class="listhead">
+          <h2 class="h2">Versions</h2>
+          <button class="pill primary" id="addBounce" type="button">+ Ajouter un bounce</button>
+        </div>
+        <div class="rows" id="bounceList" style="margin-top: 14px"></div>
+        <input type="file" id="bounceFile" accept="audio/*,.wav,.aif,.aiff,.mp3,.flac,.m4a">
+        <input type="file" id="attachFile" accept="audio/*,.wav,.aif,.aiff,.mp3,.flac,.m4a">
+      </section>
+
+      <section class="tl" id="tl" hidden>
+        <div class="tl-head">
+          <div class="v" id="tlLabel">V1</div>
+          <div class="f mono" id="tlFile"></div>
+        </div>
+        <input class="field" id="tlComment" placeholder="Ce qui change dans cette version (ex : voix +1 dB, nouveau limiteur)" maxlength="300">
+        <div class="wave" id="wave" aria-label="Timeline : cliquez pour vous placer">
+          <canvas id="waveCanvas"></canvas>
+          <div class="ph" id="playhead"></div>
+          <div id="markers"></div>
+          <div class="nowave" id="noWave" hidden>Associez le fichier audio pour afficher la forme d’onde</div>
+        </div>
+        <div class="tl-transport">
+          <button class="mini-play" id="nPlay" type="button" disabled>Lecture</button>
+          <div class="time mono" id="nTime">0:00 / 0:00</div>
+          <div class="grow" id="tlActions">
+            <button class="pill" id="attachBtn" type="button">Associer le fichier audio</button>
+            <button class="pill" id="toA" type="button">Mettre en A</button>
+            <button class="pill" id="toB" type="button">Mettre en B</button>
+          </div>
+        </div>
+        <div class="hintline" id="tlHint"></div>
+        <form class="noteadd" id="noteForm">
+          <span class="at" id="noteAt">0:00</span>
+          <input id="noteInput" placeholder="Ajouter une note à cet instant…" maxlength="500" autocomplete="off">
+          <button class="pill" type="submit">Ajouter</button>
+        </form>
+        <div class="nlist" id="noteList"></div>
+        <div class="actions"><button class="pill danger" id="delBounce" type="button">Supprimer cette version</button></div>
+      </section>
+
+      <div class="actions"><button class="pill danger" id="delProj" type="button">Supprimer le projet</button></div>
+    </section>
+
+    <footer>
+      <div class="keys"><span>Espace : lecture</span><span>N : note à l’instant</span><span>Déposez un fichier audio pour ajouter un bounce</span></div>
+      <div id="storeInfo">Projets enregistrés dans ce navigateur. Les fichiers audio restent sur votre appareil.</div>
+      <div class="storemsg" id="storeMsg"></div>
+    </footer>
+  </div>
 </main>
 
 <!-- Loudness meter (ITU-R BS.1770-4 integrated loudness + 4x oversampled true peak), run in a worker -->
@@ -593,6 +799,7 @@ onmessage = e => {
   });
   document.addEventListener('dragover', e => e.preventDefault());
   document.addEventListener('drop', e => {
+    if (document.body.dataset.view === 'notes') return;
     if (e.target.closest('.slot')) return;
     e.preventDefault();
     const files = [...e.dataTransfer.files];
@@ -760,7 +967,8 @@ onmessage = e => {
   }));
 
   document.addEventListener('keydown', e => {
-    if (e.target.tagName === 'INPUT' && e.target.type !== 'range' && e.target.type !== 'checkbox') return;
+    if (document.body.dataset.view === 'notes') return;
+    if (e.target.tagName === 'TEXTAREA' || (e.target.tagName === 'INPUT' && e.target.type !== 'range' && e.target.type !== 'checkbox')) return;
     const key = e.key.toLowerCase();
     if (e.code === 'Space') { e.preventDefault(); playing ? pause() : play(); }
     else if (key === 'tab' || key === 'arrowleft' || key === 'arrowright') {
@@ -770,9 +978,483 @@ onmessage = e => {
     else if (key === 'b' || key === '2') setActive('B');
   });
 
+  window.comparo = { load: (k, file) => loadFile(k, file), pause };
+
   updateUI();
   updateOptions();
 })();
 </script>
+<script>
+// ---------- App switch: Comparo ⇄ Notes ----------
+(() => {
+  const views = { comparo: document.getElementById('view-comparo'), notes: document.getElementById('view-notes') };
+  const names = { comparo: 'COMPARO', notes: 'NOTES' };
+  function show(v) {
+    if (!views[v]) v = 'comparo';
+    if (document.body.dataset.view === v) return;
+    document.body.dataset.view = v;
+    for (const k in views) views[k].hidden = k !== v;
+    document.getElementById('appName').textContent = names[v];
+    document.getElementById('appLogo').classList.toggle('notes', v === 'notes');
+    document.querySelectorAll('.apps button').forEach(b => b.classList.toggle('on', b.dataset.app === v));
+    if (v === 'notes') window.comparo?.pause();
+    else window.notesApp?.pause();
+    window.notesApp?.onShow(v === 'notes');
+  }
+  document.querySelectorAll('.apps button').forEach(b => b.addEventListener('click', () => {
+    show(b.dataset.app);
+    try { history.replaceState(null, '', '#' + b.dataset.app); } catch { location.hash = b.dataset.app; }
+  }));
+  window.addEventListener('hashchange', () => show(location.hash.slice(1)));
+  show(location.hash.slice(1) || 'comparo');
+})();
+
+// ---------- Notes ----------
+(() => {
+  const STATUSES = ['Idée', 'Composition', 'Arrangement', 'Mix', 'Master', 'Terminé'];
+  const DONE = 'Terminé';
+  const STALE_DAYS = 14;
+  const LS_KEY = 'comparo-notes-v1';
+  const $ = id => document.getElementById(id);
+  const el = (tag, cls, text) => { const e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; };
+  const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
+  const fmt = s => { s = Math.max(0, s || 0); const m = Math.floor(s / 60), r = Math.floor(s % 60); return `${m}:${String(r).padStart(2, '0')}`; };
+  const ago = ts => {
+    const s = (Date.now() - ts) / 1000;
+    if (s < 60) return 'à l’instant';
+    if (s < 3600) return `il y a ${Math.floor(s / 60)} min`;
+    if (s < 86400) return `il y a ${Math.floor(s / 3600)} h`;
+    return `il y a ${Math.floor(s / 86400)} j`;
+  };
+  const day = ts => new Date(ts).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short', year: 'numeric' });
+  const plural = (n, w) => `${n} ${w}${n > 1 ? 's' : ''}`;
+
+  // ---------- Store: account (db) when the page runs on claude.ai, this browser otherwise ----------
+  let projects = [];
+  let ready = false, mode = 'local', col = null, readOnly = false;
+  const chains = new Map();
+  const readLocal = () => { try { return JSON.parse(localStorage.getItem(LS_KEY) || '[]'); } catch { return []; } };
+  const writeLocal = () => { try { localStorage.setItem(LS_KEY, JSON.stringify(projects)); } catch {} };
+  const setMsg = t => { $('storeMsg').textContent = t || ''; };
+
+  function onWriteError(e) {
+    const code = e && e.code;
+    if (code === 'invalid_argument' || code === 'not_granted' || code === 'revoked') {
+      readOnly = true; setMsg('Vous ne pouvez pas modifier ces projets depuis cette vue.');
+    } else if (code === 'quota_exceeded') setMsg('Espace de stockage plein : supprimez d’anciens projets ou versions.');
+    else setMsg('Une modification n’a pas pu être enregistrée. Réessayez dans un instant.');
+    render();
+  }
+
+  function persist(p, touch = true) {
+    if (readOnly) return;
+    if (touch) p.updatedAt = Date.now();
+    const i = projects.findIndex(x => x.id === p.id);
+    if (i < 0) projects.push(p); else projects[i] = p;
+    if (mode === 'db') {
+      const { id, ...body } = p;
+      const snapshot = JSON.parse(JSON.stringify(body));
+      const next = (chains.get(id) || Promise.resolve()).then(() => col.doc(id).set(snapshot)).catch(onWriteError);
+      chains.set(id, next);
+    } else writeLocal();
+    render();
+  }
+  function removeProject(id) {
+    if (readOnly) return;
+    projects = projects.filter(p => p.id !== id);
+    if (mode === 'db') {
+      const next = (chains.get(id) || Promise.resolve()).then(() => col.doc(id).delete()).catch(onWriteError);
+      chains.set(id, next);
+    } else writeLocal();
+    render();
+  }
+
+  async function initStore() {
+    const c = window.claude;
+    let db = null, user = null, id = null;
+    if (c && typeof c.use === 'function') {
+      try { [db, user] = await Promise.all([c.use('db'), c.use('user')]); } catch {}
+      if (user) { try { id = await user.id(); } catch {} }
+    }
+    if (!db || !id) {
+      projects = readLocal(); mode = 'local'; ready = true;
+      $('storeInfo').textContent = 'Projets enregistrés dans ce navigateur. Les fichiers audio restent sur votre appareil.';
+      render(); return;
+    }
+    mode = 'db';
+    col = db.collection('data/users/' + id);
+    $('storeInfo').textContent = 'Projets enregistrés sur votre compte, visibles par vous seul. Les fichiers audio restent sur votre appareil.';
+    const timer = setTimeout(() => {
+      if (!ready) { ready = true; setMsg('Vos projets ne répondent pas encore. Ils s’afficheront dès que la connexion revient.'); render(); }
+    }, 10000);
+    col.onSnapshot(snap => {
+      projects = snap.docs.map(d => ({ ...structuredClone(d.data()), id: d.id }));
+      if (!snap.metadata.fromCache) { clearTimeout(timer); setMsg(''); }
+      ready = true;
+      render();
+    }, () => {
+      clearTimeout(timer); ready = true;
+      setMsg('Impossible de charger vos projets pour le moment.');
+      render();
+    });
+  }
+
+  // ---------- View state ----------
+  let filter = 'open', curP = null, curB = null;
+  let pos = 0, pendingT = null;
+  const files = new Map();       // bounce id -> File (this visit only)
+  const audio = new Audio();
+  audio.preload = 'auto';
+  let audioFor = null, audioURL = null, raf = 0;
+  const cur = () => projects.find(p => p.id === curP) || null;
+  const curBounce = () => cur()?.bounces?.find(b => b.id === curB) || null;
+  const nextLabel = p => 'V' + (p.bounces.reduce((m, b) => Math.max(m, parseInt(String(b.label).slice(1)) || 0), 0) + 1);
+
+  // ---------- Rendering ----------
+  function render() {
+    if (curP && !cur()) { curP = null; curB = null; }
+    renderBanner();
+    $('projList').hidden = !!curP;
+    $('projDetail').hidden = !curP;
+    $('notesHero').hidden = !!curP;
+    if (curP) renderDetail(); else renderList();
+  }
+
+  function renderBanner() {
+    const b = $('notesBanner');
+    if (!ready) { b.textContent = 'Chargement de vos projets…'; return; }
+    const p = cur();
+    if (p) { b.textContent = `${p.name || 'Sans titre'} · ${p.status} · ${plural(p.bounces.length, 'version')}`; return; }
+    if (!projects.length) { b.textContent = 'Créez un projet pour suivre ses versions'; return; }
+    const open = projects.filter(p => p.status !== DONE);
+    const stale = open.filter(p => Date.now() - p.updatedAt > STALE_DAYS * 86400e3).length;
+    b.textContent = `${plural(open.length, 'projet')} en cours` + (stale ? ` · ${stale} en pause depuis ${STALE_DAYS} j ou plus` : '');
+  }
+
+  function renderList() {
+    document.querySelectorAll('#projFilter button').forEach(b => b.classList.toggle('on', b.dataset.f === filter));
+    $('newProj').disabled = readOnly || !ready;
+    const rows = $('projRows');
+    rows.replaceChildren();
+    if (!ready) { rows.append(el('div', 'empty', 'Chargement…')); return; }
+    const list = projects
+      .filter(p => filter === 'all' || (filter === 'done' ? p.status === DONE : p.status !== DONE))
+      .sort((a, b) => b.updatedAt - a.updatedAt);
+    if (!list.length) {
+      rows.append(el('div', 'empty', filter === 'done' ? 'Aucun projet terminé pour l’instant.'
+        : projects.length ? 'Aucun projet en cours : tout est terminé.' : 'Aucun projet. Créez-en un, puis déposez vos bounces pour noter vos retours sur la timeline.'));
+      return;
+    }
+    for (const p of list) {
+      const btn = el('button'); btn.type = 'button';
+      const l = el('span', 'l');
+      l.append(el('span', 't', p.name || 'Sans titre'));
+      const nNotes = p.bounces.reduce((s, b) => s + b.notes.length, 0);
+      const last = p.bounces.length ? p.bounces[p.bounces.length - 1].label : 'Aucune version';
+      const stale = p.status !== DONE && Date.now() - p.updatedAt > STALE_DAYS * 86400e3;
+      l.append(el('span', 's' + (stale ? ' stale' : ''), `${last} · ${plural(nNotes, 'note')} · ${stale ? 'en pause, ' : ''}${ago(p.updatedAt)}`));
+      const r = el('span', 'r');
+      r.append(el('span', 'd' + (p.status === DONE ? ' done' : ''), p.status));
+      btn.append(l, r);
+      btn.addEventListener('click', () => openProject(p.id));
+      rows.append(btn);
+    }
+  }
+
+  function setVal(input, v) { if (document.activeElement !== input && input.value !== v) input.value = v; }
+
+  function renderDetail() {
+    const p = cur();
+    setVal($('pName'), p.name || '');
+    setVal($('pNotes'), p.notes || '');
+    $('pMeta').textContent = `Créé le ${day(p.createdAt)} · modifié ${ago(p.updatedAt)}`;
+    const st = $('pStatus'); st.replaceChildren();
+    for (const s of STATUSES) {
+      const b = el('button', s === p.status ? 'on' : '', s); b.type = 'button';
+      b.addEventListener('click', () => { if (p.status !== s) { p.status = s; persist(p); } });
+      st.append(b);
+    }
+    [$('pName'), $('pNotes'), $('addBounce'), $('delProj')].forEach(x => x.disabled = readOnly);
+
+    if (curB && !p.bounces.some(b => b.id === curB)) curB = null;
+    if (!curB && p.bounces.length) curB = p.bounces[p.bounces.length - 1].id;
+
+    const list = $('bounceList'); list.replaceChildren();
+    if (!p.bounces.length) list.append(el('div', 'empty', 'Aucune version. Déposez un fichier audio ici ou utilisez « Ajouter un bounce ».'));
+    for (const b of [...p.bounces].reverse()) {
+      const btn = el('button', b.id === curB ? 'on' : ''); btn.type = 'button';
+      const l = el('span', 'l');
+      l.append(el('span', 't', b.label + (b.comment ? ' · ' + b.comment : '')));
+      l.append(el('span', 's', `${b.file} · ${fmt(b.duration)} · ${day(b.createdAt)}`));
+      const r = el('span', 'r');
+      r.append(el('span', 'c', plural(b.notes.length, 'note')), el('span', 'dot'));
+      btn.append(l, r);
+      btn.addEventListener('click', () => { curB = b.id; pendingT = null; render(); });
+      list.append(btn);
+    }
+    renderTimeline();
+  }
+
+  function renderTimeline() {
+    const b = curBounce();
+    $('tl').hidden = !b;
+    if (!b) { stopAudio(); return; }
+    if (audioFor !== b.id) loadAudio(b);
+    $('tlLabel').textContent = b.label;
+    $('tlFile').textContent = `${b.file} · ${fmt(b.duration)}`;
+    setVal($('tlComment'), b.comment || '');
+    $('tlComment').disabled = readOnly;
+    const has = files.has(b.id);
+    $('attachBtn').hidden = has;
+    $('toA').hidden = $('toB').hidden = !has || !window.comparo;
+    $('nPlay').disabled = !has;
+    if (!has && !$('tlHint').dataset.keep) $('tlHint').textContent = 'Le fichier audio n’est pas conservé : associez-le à nouveau pour écouter cette version. Vous pouvez quand même placer des notes en cliquant sur la timeline.';
+    else if (has && !$('tlHint').dataset.keep) $('tlHint').textContent = '';
+    $('noWave').hidden = !!(b.peaks && b.peaks.length);
+    $('noteInput').disabled = $('noteForm').querySelector('button').disabled = readOnly;
+    $('delBounce').disabled = readOnly;
+
+    const nl = $('noteList'); nl.replaceChildren();
+    const mk = $('markers'); mk.replaceChildren();
+    const notes = [...b.notes].sort((x, y) => x.t - y.t);
+    if (!notes.length) nl.append(el('div', 'empty', 'Pas encore de note. Mettez en lecture, puis écrivez ce que vous entendez : la note est placée à l’instant où vous commencez à taper.'));
+    for (const n of notes) {
+      const row = el('div', 'nrow'); row.dataset.id = n.id;
+      const tt = el('button', 'tt', fmt(n.t)); tt.type = 'button'; tt.title = 'Aller à ' + fmt(n.t);
+      tt.addEventListener('click', () => seek(n.t, true));
+      const x = el('button', 'x', '×'); x.type = 'button'; x.title = 'Supprimer la note'; x.setAttribute('aria-label', 'Supprimer la note'); x.disabled = readOnly;
+      x.addEventListener('click', () => { const p = cur(); b.notes = b.notes.filter(z => z.id !== n.id); persist(p); });
+      row.append(tt, el('div', 'tx', n.text), x);
+      nl.append(row);
+      if (b.duration) {
+        const m = el('button', 'mk'); m.type = 'button';
+        m.style.left = (n.t / b.duration * 100) + '%';
+        m.title = `${fmt(n.t)} · ${n.text}`; m.setAttribute('aria-label', m.title);
+        m.addEventListener('click', e => { e.stopPropagation(); seek(n.t, true); flash(n.id); });
+        mk.append(m);
+      }
+    }
+    drawWave(); tickUI();
+  }
+
+  function flash(id) {
+    const row = document.querySelector(`.nrow[data-id="${CSS.escape(id)}"]`);
+    if (!row) return;
+    row.classList.add('flash'); row.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+    setTimeout(() => row.classList.remove('flash'), 1200);
+  }
+
+  // ---------- Waveform ----------
+  const css = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+  function drawWave() {
+    const b = curBounce(), cv = $('waveCanvas');
+    if (!b || $('tl').hidden) return;
+    const w = cv.clientWidth, h = cv.clientHeight, dpr = window.devicePixelRatio || 1;
+    if (!w || !h) return;
+    if (cv.width !== Math.round(w * dpr) || cv.height !== Math.round(h * dpr)) { cv.width = Math.round(w * dpr); cv.height = Math.round(h * dpr); }
+    const g = cv.getContext('2d');
+    g.setTransform(dpr, 0, 0, dpr, 0, 0);
+    g.clearRect(0, 0, w, h);
+    const peaks = b.peaks || [];
+    const frac = b.duration ? pos / b.duration : 0;
+    g.fillStyle = css('--line'); g.fillRect(0, h / 2 - .5, w, 1);
+    if (!peaks.length) return;
+    const n = peaks.length, bw = w / n, gap = bw > 3 ? 1 : 0;
+    const ink = css('--ink'), muted = css('--muted');
+    for (let i = 0; i < n; i++) {
+      const a = Math.max(.02, peaks[i]) * (h / 2 - 4);
+      g.fillStyle = (i + .5) / n <= frac ? ink : muted;
+      g.globalAlpha = (i + .5) / n <= frac ? 1 : .55;
+      g.fillRect(i * bw, h / 2 - a, Math.max(1, bw - gap), a * 2);
+    }
+    g.globalAlpha = 1;
+  }
+  window.addEventListener('resize', drawWave);
+
+  function tickUI() {
+    const b = curBounce();
+    if (!b) return;
+    const d = b.duration || 0;
+    $('playhead').style.left = (d ? Math.min(1, pos / d) * 100 : 0) + '%';
+    $('nTime').textContent = `${fmt(pos)} / ${fmt(d)}`;
+    $('noteAt').textContent = fmt(pendingT ?? pos);
+    const playing = !audio.paused;
+    $('nPlay').classList.toggle('playing', playing);
+    $('nPlay').textContent = playing ? 'Pause' : 'Lecture';
+  }
+
+  // ---------- Audio ----------
+  function stopAudio() {
+    audio.pause();
+    if (audioURL) { URL.revokeObjectURL(audioURL); audioURL = null; }
+    audio.removeAttribute('src'); audio.load();
+    audioFor = null;
+  }
+  function loadAudio(b) {
+    stopAudio();
+    audioFor = b.id; pos = 0; pendingT = null;
+    const f = files.get(b.id);
+    if (f) { audioURL = URL.createObjectURL(f); audio.src = audioURL; }
+  }
+  function seek(t, play) {
+    const b = curBounce(); if (!b) return;
+    pos = Math.max(0, Math.min(t, b.duration || 0));
+    if (audio.src) { try { audio.currentTime = pos; } catch {} if (play && audio.paused) audio.play().catch(() => {}); }
+    drawWave(); tickUI();
+  }
+  function loop() {
+    cancelAnimationFrame(raf);
+    const step = () => { if (audio.paused) { tickUI(); drawWave(); return; } pos = audio.currentTime; tickUI(); drawWave(); raf = requestAnimationFrame(step); };
+    raf = requestAnimationFrame(step);
+  }
+  audio.addEventListener('play', loop);
+  audio.addEventListener('pause', () => { tickUI(); });
+  audio.addEventListener('ended', () => { pos = 0; tickUI(); drawWave(); });
+  const togglePlay = () => { if (!audio.src) return; audio.paused ? audio.play().catch(() => {}) : audio.pause(); };
+  $('nPlay').addEventListener('click', togglePlay);
+
+  $('wave').addEventListener('click', e => {
+    const b = curBounce(); if (!b || !b.duration) return;
+    const r = $('wave').getBoundingClientRect();
+    seek((e.clientX - r.left) / r.width * b.duration, false);
+    pendingT = null; tickUI();
+  });
+
+  async function analyze(file) {
+    const buf = await file.arrayBuffer();
+    const Ctx = window.OfflineAudioContext || window.webkitOfflineAudioContext;
+    const ac = new Ctx(1, 1, 44100);
+    const ab = await ac.decodeAudioData(buf);
+    const N = 240, len = ab.length, step = Math.max(1, Math.floor(len / N));
+    const peaks = new Array(N).fill(0);
+    for (let c = 0; c < ab.numberOfChannels; c++) {
+      const d = ab.getChannelData(c);
+      for (let i = 0; i < N; i++) {
+        let m = peaks[i];
+        const end = Math.min(len, (i + 1) * step);
+        for (let j = i * step; j < end; j++) { const v = d[j] < 0 ? -d[j] : d[j]; if (v > m) m = v; }
+        peaks[i] = m;
+      }
+    }
+    const top = Math.max(...peaks) || 1;
+    return { duration: ab.duration, peaks: peaks.map(v => Math.round(v / top * 1000) / 1000) };
+  }
+
+  async function addBounce(file) {
+    const p = cur(); if (!p || !file || readOnly) return;
+    $('tlHint').dataset.keep = '1';
+    $('tlHint').textContent = `Analyse de ${file.name}…`;
+    $('tl').hidden = false;
+    try {
+      const { duration, peaks } = await analyze(file);
+      const b = { id: uid(), label: nextLabel(p), file: file.name, duration: Math.round(duration * 100) / 100, peaks, createdAt: Date.now(), comment: '', notes: [] };
+      files.set(b.id, file);
+      p.bounces.push(b);
+      curB = b.id; audioFor = null;
+      delete $('tlHint').dataset.keep;
+      persist(p);
+    } catch (e) {
+      $('tlHint').textContent = `Impossible de lire ${file.name}. Essayez un fichier WAV, AIFF, FLAC ou MP3.`;
+      setTimeout(() => { delete $('tlHint').dataset.keep; }, 4000);
+    }
+  }
+
+  async function attach(file) {
+    const p = cur(), b = curBounce(); if (!b || !file) return;
+    files.set(b.id, file); audioFor = null;
+    if (!b.peaks || !b.peaks.length || !b.duration) {
+      try { const r = await analyze(file); b.peaks = r.peaks; b.duration = Math.round(r.duration * 100) / 100; persist(p, false); return; } catch {}
+    }
+    render();
+  }
+
+  // ---------- Actions ----------
+  function openProject(id) { curP = id; curB = null; pendingT = null; stopAudio(); render(); window.scrollTo({ top: 0 }); }
+  $('backBtn').addEventListener('click', () => { curP = null; curB = null; stopAudio(); render(); });
+  document.querySelectorAll('#projFilter button').forEach(b => b.addEventListener('click', () => { filter = b.dataset.f; renderList(); }));
+  $('newProj').addEventListener('click', () => {
+    const now = Date.now();
+    const p = { id: uid(), name: 'Nouveau projet', status: 'Idée', notes: '', bounces: [], createdAt: now, updatedAt: now };
+    curP = p.id; curB = null;
+    persist(p);
+    $('pName').focus(); $('pName').select();
+  });
+
+  const timers = {};
+  const debounce = (key, fn, ms = 600) => { clearTimeout(timers[key]); timers[key] = setTimeout(fn, ms); };
+  $('pName').addEventListener('input', () => { const p = cur(); if (!p) return; p.name = $('pName').value; renderBanner(); debounce('name' + p.id, () => persist(p)); });
+  $('pNotes').addEventListener('input', () => { const p = cur(); if (!p) return; p.notes = $('pNotes').value; debounce('notes' + p.id, () => persist(p)); });
+  $('tlComment').addEventListener('input', () => { const p = cur(), b = curBounce(); if (!b) return; b.comment = $('tlComment').value; debounce('c' + b.id, () => persist(p)); });
+
+  $('addBounce').addEventListener('click', () => $('bounceFile').click());
+  $('bounceFile').addEventListener('change', e => { const f = e.target.files[0]; e.target.value = ''; addBounce(f); });
+  $('attachBtn').addEventListener('click', () => $('attachFile').click());
+  $('attachFile').addEventListener('change', e => { const f = e.target.files[0]; e.target.value = ''; attach(f); });
+  for (const k of ['A', 'B']) $('to' + k).addEventListener('click', () => {
+    const b = curBounce(); const f = b && files.get(b.id);
+    if (!f || !window.comparo) return;
+    window.comparo.load(k, f);
+    $('tlHint').dataset.keep = '1';
+    $('tlHint').textContent = `${b.label} est en piste ${k} dans Comparo.`;
+    setTimeout(() => { delete $('tlHint').dataset.keep; }, 4000);
+  });
+
+  // Two-step deletes (no browser dialogs inside the viewer)
+  function armed(btn, label, confirmLabel, action) {
+    btn.addEventListener('click', () => {
+      if (btn.classList.contains('armed')) { btn.classList.remove('armed'); btn.textContent = label; action(); return; }
+      btn.classList.add('armed'); btn.textContent = confirmLabel;
+      setTimeout(() => { btn.classList.remove('armed'); btn.textContent = label; }, 4000);
+    });
+  }
+  armed($('delBounce'), 'Supprimer cette version', 'Confirmer : supprimer la version et ses notes', () => {
+    const p = cur(), b = curBounce(); if (!b) return;
+    p.bounces = p.bounces.filter(x => x.id !== b.id); files.delete(b.id); curB = null; stopAudio(); persist(p);
+  });
+  armed($('delProj'), 'Supprimer le projet', 'Confirmer : supprimer le projet entier', () => {
+    const p = cur(); if (!p) return;
+    p.bounces.forEach(b => files.delete(b.id)); curP = null; curB = null; stopAudio(); removeProject(p.id);
+  });
+
+  // Notes on the timeline: the time is taken when you start typing
+  $('noteInput').addEventListener('input', () => { if (pendingT == null && $('noteInput').value) { pendingT = pos; tickUI(); } if (!$('noteInput').value) { pendingT = null; tickUI(); } });
+  $('noteForm').addEventListener('submit', e => {
+    e.preventDefault();
+    const p = cur(), b = curBounce(); const text = $('noteInput').value.trim();
+    if (!b || !text || readOnly) return;
+    const t = Math.round((pendingT ?? pos) * 100) / 100;
+    b.notes.push({ id: uid(), t, text, createdAt: Date.now() });
+    $('noteInput').value = ''; pendingT = null;
+    persist(p);
+  });
+
+  // Drop audio files on the project page to add bounces
+  const nv = $('view-notes');
+  nv.addEventListener('dragover', e => { if (!curP) return; e.preventDefault(); nv.classList.add('dropping'); });
+  nv.addEventListener('dragleave', e => { if (e.target === nv || !nv.contains(e.relatedTarget)) nv.classList.remove('dropping'); });
+  nv.addEventListener('drop', async e => {
+    nv.classList.remove('dropping');
+    if (!curP) return;
+    e.preventDefault();
+    for (const f of [...e.dataTransfer.files]) await addBounce(f);
+  });
+
+  document.addEventListener('keydown', e => {
+    if (document.body.dataset.view !== 'notes' || !curP) return;
+    const t = e.target, typing = t.tagName === 'TEXTAREA' || (t.tagName === 'INPUT' && !['range', 'checkbox'].includes(t.type)) || t.isContentEditable;
+    if (typing) { if (e.key === 'Escape') t.blur(); return; }
+    if (e.code === 'Space') { e.preventDefault(); togglePlay(); }
+    else if (e.key.toLowerCase() === 'n' && curBounce()) { e.preventDefault(); pendingT = pos; tickUI(); $('noteInput').focus(); }
+  });
+
+  window.notesApp = {
+    pause: () => audio.pause(),
+    onShow: visible => { if (visible) requestAnimationFrame(drawWave); },
+  };
+  render();
+  initStore();
+})();
+</script>
+
 </body>
 </html>

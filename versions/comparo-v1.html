@@ -1,0 +1,778 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Comparo</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@300;400;500&family=Inter:wght@300;400;500&family=IBM+Plex+Mono:wght@400&display=swap">
+<style>
+  /* Layout: one centered dark column. Light rounded cards hold the two tracks; a coral disc is the one loud control; mint marks status and the selected option. Deliberately single-theme (dark). */
+  :root {
+    --bg: #000000; --ink: #efebe6; --muted: #8e8a85; --line: #2c2c2c;
+    --card: #efebe6; --card-ink: #121212; --card-muted: #77736d;
+    --chip: #141414; --mint: #a9ecd5; --mint-ink: #0c2a21;
+    --coral: #e0604f; --coral-hi: #f08c78; --green: #00a86b; --green-hi: #34c88f; --white: #ffffff; --black: #000000; --warn: #ffcf5c;
+    --display: "Inter Tight", "Helvetica Neue", Arial, sans-serif;
+    --text: "Inter", "Helvetica Neue", Arial, sans-serif;
+    --mono: "IBM Plex Mono", ui-monospace, "SF Mono", Menlo, monospace;
+    color-scheme: dark;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; min-height: 100%; }
+  body {
+    background: var(--bg); color: var(--ink);
+    font: 300 17px/1.5 var(--text);
+    padding-block: 24px 48px;
+    padding-left: max(16px, env(safe-area-inset-left, 0px));
+    padding-right: max(16px, env(safe-area-inset-right, 0px));
+  }
+  main { width: 100%; max-width: 720px; margin: 0 auto; display: flex; flex-direction: column; gap: 44px; }
+  button { font: inherit; color: inherit; }
+  :focus-visible { outline: 2px solid var(--mint); outline-offset: 3px; }
+  .mono { font-family: var(--mono); font-weight: 400; font-size: 13px; text-transform: uppercase; letter-spacing: .18em; }
+
+  /* Masthead */
+  .top { display: flex; justify-content: center; align-items: center; gap: 12px; }
+  .logo { width: 30px; height: 30px; background: var(--ink); display: grid; place-items: center; }
+  .logo::before { content: ""; width: 18px; height: 18px; border-radius: 50%; background: var(--bg); }
+  .logo + span { font-family: var(--display); font-weight: 500; font-size: 20px; letter-spacing: -0.01em; }
+  .banner {
+    background: var(--mint); color: var(--mint-ink); border-radius: 8px;
+    padding: 12px 16px; display: flex; justify-content: space-between; align-items: center; gap: 12px;
+  }
+  .hero {
+    margin: 0; text-align: center; font-family: var(--display); font-weight: 300;
+    font-size: clamp(44px, 10vw, 84px); line-height: 1.02; letter-spacing: -0.035em; text-wrap: balance;
+  }
+
+  /* Track cards */
+  .slots { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  .slot {
+    position: relative; min-width: 0;
+    border-radius: 24px; border: 1px solid var(--line); background: var(--chip);
+    padding: 20px 20px 22px; min-height: 210px;
+    display: flex; flex-direction: column; gap: 12px;
+    cursor: pointer; user-select: none;
+    transition: background .2s, color .2s, border-color .2s, transform .2s;
+  }
+  .slot:hover, .slot.drag { border-color: var(--muted); }
+  .slot .tag { color: var(--muted); }
+  .slot .body { display: flex; flex-direction: column; gap: 10px; min-width: 0; flex: 1; }
+  .slot .name { font-family: var(--display); font-weight: 400; font-size: 24px; line-height: 1.15; letter-spacing: -0.02em; word-break: break-all; }
+  .slot .meta { font-family: var(--mono); font-size: 11.5px; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); }
+  .slot .loud { display: flex; flex-direction: column; gap: 4px; margin-top: auto; font-variant-numeric: tabular-nums; }
+  .slot .loud:empty { display: none; }
+  .slot .loud .big { font-family: var(--display); font-weight: 500; font-size: 38px; letter-spacing: -0.03em; line-height: 1; }
+  .slot .loud .big small { font-family: var(--mono); font-size: 12px; font-weight: 400; letter-spacing: .14em; color: var(--muted); margin-left: 6px; }
+  .slot .loud .sub { font-family: var(--mono); font-size: 11.5px; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); }
+  .slot .loud .w { color: var(--warn); }
+  .slot .loud .pf { color: var(--ink); }
+  .slot.active { background: var(--card); color: var(--card-ink); border-color: var(--card); }
+  .slot.active .tag, .slot.active .meta, .slot.active .loud .sub, .slot.active .loud .big small { color: var(--card-muted); }
+  .slot.active .loud .pf { color: var(--card-ink); }
+  .slot.active .loud .w { color: #9a5a00; }
+  .slot .replace {
+    position: absolute; top: 14px; right: 14px;
+    font-family: var(--mono); font-size: 11px; letter-spacing: .14em; text-transform: uppercase;
+    background: transparent; border: 1px solid currentColor; border-radius: 999px; padding: 5px 12px; cursor: pointer; opacity: .7;
+  }
+  .slot .replace:hover { opacity: 1; }
+  .slot:not(.loaded) .replace { display: none; }
+  .slot:not(.loaded) .name { color: var(--muted); }
+  input[type=file] { display: none; }
+
+  /* Transport */
+  .transport { display: flex; flex-direction: column; align-items: center; gap: 22px; }
+  .switch { display: flex; gap: 14px; justify-content: center; }
+  .switch button {
+    min-width: 128px; height: 56px; border-radius: 999px; cursor: pointer;
+    background: transparent; border: 1.5px solid var(--line); color: var(--muted);
+    font-family: var(--mono); font-size: 15px; letter-spacing: .2em; text-transform: uppercase;
+  }
+  .switch button:hover:not(:disabled) { border-color: var(--muted); color: var(--ink); }
+  .switch button.on, .switch button.on:hover:not(:disabled) { background: var(--white); border-color: var(--white); color: var(--black); }
+  .switch button:disabled { opacity: .35; cursor: default; }
+  button.main {
+    width: 200px; height: 200px; border-radius: 50%; border: none; cursor: pointer;
+    background: radial-gradient(circle at 50% 50%, var(--green) 62%, var(--green-hi) 100%);
+    color: var(--white); font-family: var(--display); font-weight: 300; font-size: 40px; letter-spacing: -0.02em;
+    box-shadow: 0 0 60px rgba(0, 168, 107, .3);
+    transition: transform .2s, box-shadow .2s;
+  }
+  button.main:hover:not(:disabled) { transform: scale(1.03); box-shadow: 0 0 80px rgba(0, 168, 107, .42); }
+  button.main.playing { background: radial-gradient(circle at 50% 50%, var(--coral) 62%, var(--coral-hi) 100%); box-shadow: 0 0 80px rgba(224, 96, 79, .4); }
+  button.main:disabled { opacity: .3; cursor: default; box-shadow: none; }
+  .time { color: var(--muted); font-variant-numeric: tabular-nums; }
+  .seekrow { width: 100%; display: flex; }
+  input[type=range] { flex: 1; min-width: 0; accent-color: var(--ink); }
+  .row { width: 100%; display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+  label.loop { display: flex; gap: 8px; align-items: center; cursor: pointer; color: var(--muted); }
+  label.loop input { accent-color: var(--mint); }
+  .warn { color: var(--warn); font-size: 14px; }
+
+  /* Options */
+  .opt { display: flex; flex-direction: column; }
+  .h2 { margin: 0 0 8px; font-family: var(--display); font-weight: 300; font-size: clamp(40px, 8vw, 60px); letter-spacing: -0.035em; line-height: 1.05; }
+  .seg { display: flex; flex-direction: column; }
+  .seg button {
+    display: flex; justify-content: space-between; align-items: center; gap: 16px;
+    background: none; border: none; border-bottom: 1px solid var(--line);
+    padding: 18px 0; text-align: left; cursor: pointer;
+    font-family: var(--text); font-weight: 300; font-size: 20px; color: var(--muted);
+    transition: color .15s;
+  }
+  .seg button:hover { color: var(--ink); }
+  .seg button .d {
+    flex: none; font-family: var(--mono); font-size: 12px; letter-spacing: .14em; text-transform: uppercase;
+    background: var(--chip); border: 1px solid var(--line); border-radius: 10px; padding: 7px 12px; color: var(--muted);
+  }
+  .seg button.on { color: var(--ink); }
+  .seg button .dot { flex: none; width: 10px; height: 10px; border-radius: 50%; background: transparent; }
+  .seg button.on .dot { background: var(--mint); }
+  .seg button.on .d { background: var(--mint); border-color: var(--mint); color: var(--mint-ink); }
+  .note { margin-top: 16px; color: var(--muted); font-size: 16px; max-width: 60ch; font-variant-numeric: tabular-nums; }
+  .note:empty { display: none; }
+  .note b { color: var(--ink); font-weight: 500; }
+
+  footer { text-align: center; color: var(--muted); display: flex; flex-direction: column; gap: 8px; font-size: 15px; }
+  footer .keys { display: flex; justify-content: center; flex-wrap: wrap; gap: 6px 22px; }
+  @media (max-width: 560px) {
+    .slots { grid-template-columns: 1fr; }
+    .slot { min-height: 0; }
+    .switch button { min-width: 0; flex: 1; }
+    .switch { width: 100%; }
+    button.main { width: 168px; height: 168px; font-size: 34px; }
+    .banner { font-size: 11.5px; letter-spacing: .14em; }
+    .seg button { font-size: 18px; }
+  }
+  @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+</style>
+</head>
+<body>
+<main>
+  <header class="top"><div class="logo" aria-hidden="true"></div><span>COMPARO</span></header>
+
+  <div class="banner mono" id="banner"><span id="bannerText">Déposez deux fichiers · A et B</span><span aria-hidden="true">↓</span></div>
+
+  <h1 class="hero">Entendre la différence entre A et B</h1>
+
+  <section class="slots">
+    <div class="slot" data-k="A">
+      <div class="tag mono">Piste A</div>
+      <div class="body">
+        <div class="name">Déposer un .wav ici</div>
+        <div class="meta">ou cliquer pour choisir</div>
+        <div class="loud"></div>
+      </div>
+      <button class="replace" type="button">Changer</button>
+      <input type="file" id="fileA" accept=".wav,audio/wav,audio/x-wav,audio/wave">
+    </div>
+    <div class="slot" data-k="B">
+      <div class="tag mono">Piste B</div>
+      <div class="body">
+        <div class="name">Déposer un .wav ici</div>
+        <div class="meta">ou cliquer pour choisir</div>
+        <div class="loud"></div>
+      </div>
+      <button class="replace" type="button">Changer</button>
+      <input type="file" id="fileB" accept=".wav,audio/wav,audio/x-wav,audio/wave">
+    </div>
+  </section>
+
+  <section class="transport">
+    <div class="switch">
+      <button data-k="A" class="on" disabled>A</button>
+      <button data-k="B" disabled>B</button>
+    </div>
+    <button class="main" id="play" disabled title="Lecture / Pause (Espace)">Lecture</button>
+    <div class="time mono" id="time">0:00 / 0:00</div>
+    <div class="seekrow"><input type="range" id="seek" min="0" max="1000" value="0" step="1" disabled aria-label="Position"></div>
+    <div class="row">
+      <div class="warn" id="warn"></div>
+      <label class="loop mono"><input type="checkbox" id="loop"> Boucle</label>
+    </div>
+  </section>
+
+  <section class="opt">
+    <h2 class="h2">Écouter sur</h2>
+    <div class="seg" id="sim">
+      <button data-v="off" class="on"><span>Studio (original)</span><span class="dot" aria-hidden="true"></span></button>
+      <button data-v="phone"><span>Haut-parleur de téléphone</span><span class="dot" aria-hidden="true"></span></button>
+      <button data-v="earbuds"><span>Écouteurs bas de gamme</span><span class="dot" aria-hidden="true"></span></button>
+      <button data-v="car"><span>Voiture</span><span class="dot" aria-hidden="true"></span></button>
+      <button data-v="bt"><span>Enceinte Bluetooth</span><span class="dot" aria-hidden="true"></span></button>
+    </div>
+    <div class="note" id="simNote"></div>
+  </section>
+
+  <section class="opt">
+    <h2 class="h2">Normalisation</h2>
+    <div class="seg" id="norm">
+      <button data-v="off" class="on"><span>Aucune</span><span class="d">Origine</span></button>
+      <button data-v="spotify"><span>Spotify</span><span class="d">−14 LUFS</span></button>
+      <button data-v="apple"><span>Apple Music</span><span class="d">−16 LUFS</span></button>
+      <button data-v="youtube"><span>YouTube</span><span class="d">−14 LUFS</span></button>
+    </div>
+    <div class="note" id="normNote"></div>
+  </section>
+
+  <footer>
+    <div class="keys"><span>Espace : lecture</span><span>Tab : basculer A/B</span><span>A ou B : choisir</span></div>
+    <div>Comparo lit vos fichiers localement. Rien n’est envoyé sur Internet.</div>
+  </footer>
+</main>
+
+<!-- Loudness meter (ITU-R BS.1770-4 integrated loudness + 4x oversampled true peak), run in a worker -->
+<script type="text/plain" id="meter-src">
+function kCoefs(fs) {
+  let f0 = 1681.974450955533, G = 3.999843853973347, Q = 0.7071752369554196;
+  let K = Math.tan(Math.PI * f0 / fs), Vh = Math.pow(10, G / 20), Vb = Math.pow(Vh, 0.4996667741545416);
+  let a0 = 1 + K / Q + K * K;
+  const s1 = { b0: (Vh + Vb * K / Q + K * K) / a0, b1: 2 * (K * K - Vh) / a0, b2: (Vh - Vb * K / Q + K * K) / a0,
+               a1: 2 * (K * K - 1) / a0, a2: (1 - K / Q + K * K) / a0 };
+  f0 = 38.13547087602444; Q = 0.5003270373238773; K = Math.tan(Math.PI * f0 / fs);
+  a0 = 1 + K / Q + K * K;
+  const s2 = { b0: 1, b1: -2, b2: 1, a1: 2 * (K * K - 1) / a0, a2: (1 - K / Q + K * K) / a0 };
+  return [s1, s2];
+}
+// 4x oversampling: windowed-sinc interpolation of the 3 in-between points
+const P = 4, H = 8, TAPS = 2 * H;
+const phases = [];
+for (let p = 1; p < P; p++) {
+  const c = new Float64Array(TAPS);
+  for (let j = 0; j < TAPS; j++) {
+    const k = j - H + 1, d = p / P - k;
+    const sinc = Math.sin(Math.PI * d) / (Math.PI * d);
+    const w = 0.5 * (1 + Math.cos(Math.PI * d / (H + 0.5)));
+    c[j] = sinc * w;
+  }
+  phases.push(c);
+}
+onmessage = e => {
+  const { chs, sr } = e.data;
+  const [s1, s2] = kCoefs(sr);
+  const seg = Math.round(sr * 0.1);
+  const n = chs[0].length;
+  const nseg = Math.floor(n / seg);
+  const segE = new Float64Array(nseg);
+  let peak = 0;
+  for (let c = 0; c < chs.length; c++) {
+    const x = chs[c];
+    const wgt = chs.length >= 5 && (c === 4 || c === 5) ? 1.41 : (chs.length >= 6 && c === 3 ? 0 : 1);
+    let x1 = 0, x2 = 0, y1 = 0, y2 = 0, z1 = 0, z2 = 0;
+    for (let i = 0; i < n; i++) {
+      const v = x[i];
+      const a = Math.abs(v); if (a > peak) peak = a;
+      const y = s1.b0 * v + s1.b1 * x1 + s1.b2 * x2 - s1.a1 * y1 - s1.a2 * y2;
+      x2 = x1; x1 = v;
+      const z = y - 2 * y1 + y2 - s2.a1 * z1 - s2.a2 * z2;
+      y2 = y1; y1 = y;
+      z2 = z1; z1 = z;
+      const si = (i / seg) | 0;
+      if (si < nseg) segE[si] += wgt * z * z;
+    }
+    for (let i = H - 1; i < n - H; i++) {
+      for (let p = 0; p < P - 1; p++) {
+        const cf = phases[p];
+        let s = 0;
+        for (let j = 0; j < TAPS; j++) s += x[i - H + 1 + j] * cf[j];
+        if (s < 0) s = -s;
+        if (s > peak) peak = s;
+      }
+    }
+  }
+  const blocks = [];
+  for (let j = 0; j + 3 < nseg; j++) blocks.push((segE[j] + segE[j + 1] + segE[j + 2] + segE[j + 3]) / (4 * seg));
+  const L = z => -0.691 + 10 * Math.log10(z);
+  const mean = a => a.reduce((s, v) => s + v, 0) / a.length;
+  let lufs = -Infinity;
+  const abs = blocks.filter(z => L(z) > -70);
+  if (abs.length) {
+    const rel = L(mean(abs)) - 10;
+    const g = abs.filter(z => L(z) > rel);
+    if (g.length) lufs = L(mean(g));
+  }
+  postMessage({ lufs, tp: peak > 0 ? 20 * Math.log10(peak) : -Infinity });
+};
+</script>
+
+<script>
+(() => {
+  // ---------- State ----------
+  const tracks = { A: null, B: null };   // { name, bytes, info, buffer, meter }
+  let ctx = null;
+  let sw = {};        // A/B switch gains
+  let normG = {};     // per-track normalization gains
+  let sum = null;     // mix bus feeding the playback simulator
+  let chain = [];     // simulator nodes
+  let sources = [];
+  let active = 'A';
+  let playing = false;
+  let startCtxTime = 0;
+  let pauseOffset = 0;
+  let raf = 0;
+  let seeking = false;
+  let simMode = 'off';
+  let normMode = 'off';
+
+  const $ = s => document.querySelector(s);
+  const playBtn = $('#play');
+  const seek = $('#seek');
+  const timeEl = $('#time');
+  const warnEl = $('#warn');
+  const loopEl = $('#loop');
+  const switchBtns = [...document.querySelectorAll('.switch button')];
+  const slots = [...document.querySelectorAll('.slot')];
+  const slotOf = k => slots.find(s => s.dataset.k === k);
+
+  // ---------- Presets ----------
+  // filters: [type, frequency, Q, gain dB]
+  const SIM = {
+    phone: {
+      note: 'Mono, presque plus de basses sous 500 Hz, médiums durs, aigus coupés, petite pièce.',
+      trim: -3, mono: true, comp: true,
+      filters: [['highpass', 480, 0.9], ['highpass', 480, 0.7], ['peaking', 1000, 1.0, -2], ['peaking', 2600, 1.2, 6], ['lowpass', 9000, 0.7]],
+      reverb: { len: 0.35, wet: 0.12 },
+    },
+    earbuds: {
+      note: 'Stéréo, basses maigres, pic agressif vers 4–5 kHz, extrême aigu atténué.',
+      trim: -5, mono: false, comp: false,
+      filters: [['highpass', 90, 0.7], ['lowshelf', 220, 0, -4], ['peaking', 4500, 2.0, 6], ['lowpass', 13000, 0.7]],
+      reverb: null,
+    },
+    car: {
+      note: 'Basses gonflées par l’habitacle, bas-médiums qui traînent, aigus ternes, réflexions très courtes.',
+      trim: -7, mono: false, comp: false,
+      filters: [['highpass', 35, 0.7], ['lowshelf', 120, 0, 6], ['peaking', 320, 1.4, 3], ['peaking', 3000, 1.0, -3], ['lowpass', 11000, 0.7]],
+      reverb: { len: 0.12, wet: 0.14 },
+    },
+    bt: {
+      note: 'Mono, bosse de basse vers 130 Hz puis rien en dessous, limiteur intégré, pièce de taille moyenne.',
+      trim: -5, mono: true, comp: true,
+      filters: [['highpass', 75, 1.0], ['peaking', 130, 1.5, 5], ['peaking', 2500, 1.0, -2], ['lowpass', 15000, 0.7]],
+      reverb: { len: 0.6, wet: 0.18 },
+    },
+  };
+
+  const NORM = {
+    spotify: { label: 'Spotify', target: -14, boost: true,
+      note: 'Spotify (réglage « Normal ») : −14 LUFS. Les morceaux trop forts sont baissés, les plus calmes sont montés sans dépasser −1 dBTP.' },
+    apple: { label: 'Apple Music', target: -16, boost: true,
+      note: 'Apple Music (Sound Check) : −16 LUFS. Les morceaux trop forts sont baissés, les plus calmes sont montés dans la limite de leur marge de crête.' },
+    youtube: { label: 'YouTube', target: -14, boost: false,
+      note: 'YouTube : −14 LUFS. Les morceaux trop forts sont baissés, les plus calmes ne sont jamais montés.' },
+  };
+
+  function normGainDb(k) {
+    const m = tracks[k]?.meter;
+    const p = NORM[normMode];
+    if (!p || !m || !isFinite(m.lufs)) return 0;
+    let g = p.target - m.lufs;
+    if (g > 0) g = p.boost ? Math.min(g, Math.max(0, -1 - m.tp)) : 0;
+    return g;
+  }
+
+  // ---------- WAV header parsing (to keep the native sample rate) ----------
+  function parseWav(buf) {
+    const v = new DataView(buf);
+    const tag = o => String.fromCharCode(v.getUint8(o), v.getUint8(o+1), v.getUint8(o+2), v.getUint8(o+3));
+    if (buf.byteLength < 12 || !['RIFF','RF64'].includes(tag(0)) || tag(8) !== 'WAVE') return null;
+    let o = 12;
+    while (o + 8 <= buf.byteLength) {
+      const id = tag(o), size = v.getUint32(o + 4, true);
+      if (id === 'fmt ') {
+        return {
+          format: v.getUint16(o + 8, true),
+          channels: v.getUint16(o + 10, true),
+          sampleRate: v.getUint32(o + 12, true),
+          bits: v.getUint16(o + 22, true),
+        };
+      }
+      o += 8 + size + (size & 1);
+    }
+    return null;
+  }
+
+  // ---------- Audio graph ----------
+  // source → normG[k] → sw[k] → sum → (simulator) → destination
+  // With both options off, every gain on the audible path is exactly 1.0 and the simulator is bypassed:
+  // samples reach the output untouched, at the files' native sample rate.
+  function targetRate() {
+    const t = tracks.A || tracks.B;
+    return t && t.info ? t.info.sampleRate : undefined;
+  }
+
+  async function ensureContext() {
+    const rate = targetRate();
+    if (ctx && (!rate || ctx.sampleRate === rate)) return;
+    if (ctx) { stopSources(); await ctx.close(); }
+    try { ctx = new AudioContext({ sampleRate: rate, latencyHint: 'playback' }); }
+    catch { ctx = new AudioContext({ latencyHint: 'playback' }); }
+    sum = ctx.createGain();
+    sw = {}; normG = {}; chain = [];
+    for (const k of ['A', 'B']) {
+      sw[k] = ctx.createGain();
+      sw[k].gain.value = k === active ? 1 : 0;
+      sw[k].connect(sum);
+      normG[k] = ctx.createGain();
+      normG[k].gain.value = Math.pow(10, normGainDb(k) / 20);
+      normG[k].connect(sw[k]);
+    }
+    buildChain();
+    for (const k of ['A', 'B']) if (tracks[k]) tracks[k].buffer = null;
+  }
+
+  function makeIR(len) {
+    const n = Math.max(1, Math.round(ctx.sampleRate * len));
+    const ir = ctx.createBuffer(2, n, ctx.sampleRate);
+    for (let c = 0; c < 2; c++) {
+      const d = ir.getChannelData(c);
+      for (let i = 0; i < n; i++) d[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / n, 4);
+    }
+    return ir;
+  }
+
+  function buildChain() {
+    sum.disconnect();
+    chain.forEach(n => n.disconnect());
+    chain = [];
+    const p = SIM[simMode];
+    if (!p) { sum.connect(ctx.destination); return; }
+    const add = n => { chain.push(n); return n; };
+    let node = add(ctx.createGain());
+    node.gain.value = Math.pow(10, p.trim / 20);
+    sum.connect(node);
+    if (p.mono) {
+      const m = add(ctx.createGain());
+      m.channelCount = 1; m.channelCountMode = 'explicit'; m.channelInterpretation = 'speakers';
+      node.connect(m); node = m;
+    }
+    for (const [type, f, q, g] of p.filters) {
+      const b = add(ctx.createBiquadFilter());
+      b.type = type; b.frequency.value = f; if (q) b.Q.value = q; if (g) b.gain.value = g;
+      node.connect(b); node = b;
+    }
+    if (p.comp) {
+      const c = add(ctx.createDynamicsCompressor());
+      c.threshold.value = -20; c.knee.value = 6; c.ratio.value = 4; c.attack.value = 0.005; c.release.value = 0.15;
+      node.connect(c); node = c;
+    }
+    const out = add(ctx.createGain());
+    node.connect(out);
+    if (p.reverb) {
+      const conv = add(ctx.createConvolver());
+      conv.buffer = makeIR(p.reverb.len);
+      const wet = add(ctx.createGain());
+      wet.gain.value = p.reverb.wet;
+      node.connect(conv); conv.connect(wet); wet.connect(out);
+    }
+    out.connect(ctx.destination);
+  }
+
+  function setSim(v) {
+    simMode = v;
+    if (ctx) {
+      // short fade around the rewiring to avoid clicks
+      const now = ctx.currentTime, g = sum.gain;
+      g.cancelScheduledValues(now); g.setValueAtTime(g.value, now); g.linearRampToValueAtTime(0, now + 0.015);
+      setTimeout(() => {
+        buildChain();
+        const t = ctx.currentTime;
+        g.cancelScheduledValues(t); g.setValueAtTime(0, t); g.linearRampToValueAtTime(1, t + 0.015);
+      }, 25);
+    }
+    updateOptions();
+  }
+
+  function applyNorm() {
+    if (!ctx) return;
+    const now = ctx.currentTime;
+    for (const k of ['A', 'B']) {
+      const g = normG[k].gain;
+      g.cancelScheduledValues(now); g.setValueAtTime(g.value, now);
+      g.linearRampToValueAtTime(Math.pow(10, normGainDb(k) / 20), now + 0.03);
+    }
+  }
+
+  function setNorm(v) {
+    normMode = v;
+    applyNorm();
+    updateOptions();
+  }
+
+  async function decodeAll() {
+    await ensureContext();
+    for (const k of ['A', 'B']) {
+      const t = tracks[k];
+      if (t && !t.buffer) t.buffer = await ctx.decodeAudioData(t.bytes.slice(0));
+    }
+  }
+
+  // ---------- Loudness measurement ----------
+  const meterURL = URL.createObjectURL(new Blob([$('#meter-src').textContent], { type: 'text/javascript' }));
+  function measure(buffer) {
+    return new Promise((resolve, reject) => {
+      const w = new Worker(meterURL);
+      const chs = [];
+      for (let c = 0; c < buffer.numberOfChannels; c++) chs.push(buffer.getChannelData(c).slice());
+      w.onmessage = e => { resolve(e.data); w.terminate(); };
+      w.onerror = e => { reject(e); w.terminate(); };
+      w.postMessage({ chs, sr: buffer.sampleRate }, chs.map(c => c.buffer));
+    });
+  }
+
+  // ---------- Loading ----------
+  async function loadFile(k, file) {
+    if (!file) return;
+    const wasPlaying = playing;
+    if (playing) pause();
+    const slot = slotOf(k);
+    slot.querySelector('.name').textContent = file.name;
+    slot.querySelector('.meta').textContent = 'Chargement…';
+    slot.querySelector('.loud').textContent = '';
+    let t;
+    try {
+      const bytes = await file.arrayBuffer();
+      const info = parseWav(bytes);
+      t = tracks[k] = { name: file.name, bytes, info, buffer: null, meter: null };
+      await decodeAll();
+      const b = t.buffer;
+      const parts = [];
+      if (info) {
+        parts.push((info.sampleRate / 1000).toLocaleString('fr-FR') + ' kHz');
+        parts.push(info.format === 3 ? info.bits + ' bit float' : info.bits + ' bit');
+        parts.push(info.channels === 1 ? 'mono' : info.channels === 2 ? 'stéréo' : info.channels + ' canaux');
+      }
+      parts.push(fmt(b.duration));
+      slot.querySelector('.meta').textContent = parts.join(' · ');
+      slot.classList.add('loaded');
+      slot.title = file.name;
+    } catch (e) {
+      tracks[k] = null;
+      slot.classList.remove('loaded');
+      slot.querySelector('.meta').textContent = 'Fichier illisible';
+      console.error(e);
+      t = null;
+    }
+    updateWarn();
+    updateUI();
+    updateOptions();
+    if (wasPlaying) play();
+    if (t) {
+      slot.querySelector('.loud').textContent = 'Mesure du volume…';
+      try { t.meter = await measure(t.buffer); } catch (e) { console.error(e); }
+      if (tracks[k] === t) { applyNorm(); updateOptions(); }
+    }
+  }
+
+  function updateWarn() {
+    const a = tracks.A?.info, b = tracks.B?.info;
+    const msgs = [];
+    if (ctx && targetRate() && ctx.sampleRate !== targetRate())
+      msgs.push(`Le navigateur ne supporte pas ${targetRate()} Hz : rééchantillonnage à ${ctx.sampleRate} Hz.`);
+    if (a && b && a.sampleRate !== b.sampleRate)
+      msgs.push(`Fréquences différentes (${a.sampleRate} / ${b.sampleRate} Hz) : B est rééchantillonné.`);
+    warnEl.textContent = msgs.join(' ');
+  }
+
+  slots.forEach(slot => {
+    const k = slot.dataset.k;
+    const input = slot.querySelector('input');
+    slot.addEventListener('click', e => { if (e.target !== input) input.click(); });
+    input.addEventListener('change', () => { loadFile(k, input.files[0]); input.value = ''; });
+    slot.addEventListener('dragover', e => { e.preventDefault(); slot.classList.add('drag'); });
+    slot.addEventListener('dragleave', () => slot.classList.remove('drag'));
+    slot.addEventListener('drop', e => {
+      e.preventDefault(); slot.classList.remove('drag');
+      const files = [...e.dataTransfer.files];
+      if (files.length >= 2) { loadFile('A', files[0]).then(() => loadFile('B', files[1])); }
+      else loadFile(k, files[0]);
+    });
+  });
+  document.addEventListener('dragover', e => e.preventDefault());
+  document.addEventListener('drop', e => {
+    if (e.target.closest('.slot')) return;
+    e.preventDefault();
+    const files = [...e.dataTransfer.files];
+    if (files.length >= 2) loadFile('A', files[0]).then(() => loadFile('B', files[1]));
+    else if (files[0]) loadFile(!tracks.A ? 'A' : 'B', files[0]);
+  });
+
+  // ---------- Transport ----------
+  const duration = () => Math.max(tracks.A?.buffer?.duration || 0, tracks.B?.buffer?.duration || 0);
+  const position = () => playing ? ctx.currentTime - startCtxTime : pauseOffset;
+
+  function stopSources() {
+    for (const s of sources) { s.onended = null; try { s.stop(); } catch {} s.disconnect(); }
+    sources = [];
+  }
+
+  async function play() {
+    if (!tracks.A && !tracks.B) return;
+    await decodeAll();
+    await ctx.resume();
+    if (pauseOffset >= duration()) pauseOffset = 0;
+    stopSources();
+    // Both sources are scheduled on the same clock instant: sample-accurate sync
+    const when = ctx.currentTime + 0.05;
+    for (const k of ['A', 'B']) {
+      const t = tracks[k];
+      if (!t || pauseOffset >= t.buffer.duration) continue;
+      const s = ctx.createBufferSource();
+      s.buffer = t.buffer;
+      s.connect(normG[k]);
+      s.start(when, pauseOffset);
+      sources.push(s);
+    }
+    startCtxTime = when - pauseOffset;
+    playing = true;
+    updateUI();
+    tick();
+  }
+
+  function pause() {
+    if (!playing) return;
+    pauseOffset = Math.min(position(), duration());
+    playing = false;
+    stopSources();
+    cancelAnimationFrame(raf);
+    updateUI();
+  }
+
+  function seekTo(sec) {
+    pauseOffset = Math.max(0, Math.min(sec, duration()));
+    if (playing) play(); else updateUI();
+  }
+
+  function setActive(k) {
+    if (!tracks[k]) return;
+    active = k;
+    if (ctx) {
+      // ~5 ms crossfade to avoid a click; afterwards the audible gain is exactly 1
+      const now = ctx.currentTime, ramp = 0.005;
+      for (const key of ['A', 'B']) {
+        const p = sw[key].gain;
+        p.cancelScheduledValues(now);
+        p.setValueAtTime(p.value, now);
+        p.linearRampToValueAtTime(key === k ? 1 : 0, now + ramp);
+      }
+    }
+    updateUI();
+  }
+
+  function tick() {
+    cancelAnimationFrame(raf);
+    const step = () => {
+      if (!playing) return;
+      const d = duration();
+      if (position() >= d) {
+        if (loopEl.checked) { pauseOffset = 0; play(); return; }
+        playing = false; pauseOffset = 0; stopSources(); updateUI(); return;
+      }
+      updateTime();
+      raf = requestAnimationFrame(step);
+    };
+    raf = requestAnimationFrame(step);
+  }
+
+  // ---------- UI ----------
+  function fmt(s) {
+    s = Math.max(0, s);
+    const m = Math.floor(s / 60), r = Math.floor(s % 60);
+    return `${m}:${String(r).padStart(2, '0')}`;
+  }
+  const num = (v, signed) => {
+    if (!isFinite(v)) return '−∞';
+    const s = Math.abs(v).toLocaleString('fr-FR', { minimumFractionDigits: 1, maximumFractionDigits: 1 });
+    return (v < 0 && s !== '0,0' ? '−' : signed && v > 0 ? '+' : '') + s;
+  };
+
+  function updateTime() {
+    const d = duration(), p = Math.min(position(), d);
+    timeEl.textContent = `${fmt(p)} / ${fmt(d)}`;
+    if (!seeking) seek.value = d ? Math.round(p / d * 1000) : 0;
+  }
+  function updateUI() {
+    const any = !!(tracks.A || tracks.B);
+    playBtn.disabled = !any;
+    seek.disabled = !any;
+    playBtn.textContent = playing ? 'Pause' : 'Lecture';
+    const n = (tracks.A ? 1 : 0) + (tracks.B ? 1 : 0);
+    $('#bannerText').textContent = n === 0 ? 'Déposez deux fichiers · A et B'
+      : n === 1 ? `Ajoutez la piste ${tracks.A ? 'B' : 'A'} pour comparer`
+      : playing ? `Lecture · vous écoutez ${active}` : 'Prêt · Espace pour lire';
+    if (!tracks[active] && any) { active = tracks.A ? 'A' : 'B'; setActive(active); return; }
+    switchBtns.forEach(b => {
+      b.disabled = !tracks[b.dataset.k];
+      b.classList.toggle('on', b.dataset.k === active);
+    });
+    slots.forEach(s => s.classList.toggle('active', s.dataset.k === active && !!tracks[s.dataset.k]));
+    playBtn.classList.toggle('playing', playing);
+    updateTime();
+  }
+
+  function updateOptions() {
+    document.querySelectorAll('#sim button').forEach(b => b.classList.toggle('on', b.dataset.v === simMode));
+    document.querySelectorAll('#norm button').forEach(b => b.classList.toggle('on', b.dataset.v === normMode));
+    $('#simNote').textContent = SIM[simMode]?.note || '';
+
+    const p = NORM[normMode];
+    for (const k of ['A', 'B']) {
+      const t = tracks[k], el = slotOf(k).querySelector('.loud');
+      if (!t) { el.textContent = ''; continue; }
+      if (!t.meter) continue;   // keeps "Mesure du volume…"
+      const { lufs, tp } = t.meter;
+      let html = `<span class="big">${num(lufs)}<small>LUFS</small></span><span class="sub"><span class="${tp > -1 ? 'w' : ''}" title="${tp > -1 ? 'Crête au-dessus de −1 dBTP : risque de saturation après encodage' : ''}">True peak ${num(tp)} dBTP</span>`;
+      if (p) html += ` · <span class="pf">${p.label} ${num(normGainDb(k), true)} dB</span>`;
+      html += '</span>';
+      el.innerHTML = html;
+    }
+
+    const note = $('#normNote');
+    const ma = tracks.A?.meter, mb = tracks.B?.meter;
+    let txt = p ? p.note : '';
+    if (ma && mb && isFinite(ma.lufs) && isFinite(mb.lufs)) {
+      const la = ma.lufs + normGainDb('A'), lb = mb.lufs + normGainDb('B');
+      const d = la - lb;
+      const who = Math.abs(d) < 0.05 ? 'A et B sont au même niveau'
+        : `<b>${d > 0 ? 'A' : 'B'}</b> est ${num(Math.abs(d))} dB plus fort`;
+      txt += (txt ? '<br>' : '') + (p
+        ? `Après normalisation : A ${num(la)} LUFS, B ${num(lb)} LUFS. ${who}.`
+        : `Sans normalisation : ${who}.`);
+    }
+    note.innerHTML = txt;
+  }
+
+  playBtn.addEventListener('click', () => playing ? pause() : play());
+  switchBtns.forEach(b => b.addEventListener('click', () => setActive(b.dataset.k)));
+  document.querySelectorAll('#sim button').forEach(b => b.addEventListener('click', () => setSim(b.dataset.v)));
+  document.querySelectorAll('#norm button').forEach(b => b.addEventListener('click', () => setNorm(b.dataset.v)));
+  seek.addEventListener('input', () => {
+    seeking = true;
+    const d = duration();
+    timeEl.textContent = `${fmt(seek.value / 1000 * d)} / ${fmt(d)}`;
+  });
+  seek.addEventListener('change', () => { seeking = false; seekTo(seek.value / 1000 * duration()); });
+  slots.forEach(s => s.querySelector('.replace').addEventListener('click', e => {
+    e.stopPropagation(); s.querySelector('input').click();
+  }));
+
+  document.addEventListener('keydown', e => {
+    if (e.target.tagName === 'INPUT' && e.target.type !== 'range' && e.target.type !== 'checkbox') return;
+    const key = e.key.toLowerCase();
+    if (e.code === 'Space') { e.preventDefault(); playing ? pause() : play(); }
+    else if (key === 'tab' || key === 'arrowleft' || key === 'arrowright') {
+      e.preventDefault(); setActive(active === 'A' ? 'B' : 'A');
+    }
+    else if (key === 'a' || key === '1') setActive('A');
+    else if (key === 'b' || key === '2') setActive('B');
+  });
+
+  updateUI();
+  updateOptions();
+})();
+</script>
+</body>
+</html>
